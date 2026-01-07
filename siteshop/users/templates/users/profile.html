@@ -127,17 +127,14 @@
     <hr class="section-divider">
     
     <div class="action-buttons">
-      <a href="" class="action-button password-button">
+      {% comment %} <a href="" class="action-button password-button">
         <span class="button-icon">🔑</span> Сменить пароль
-      </a>
+      </a> {% endcomment %}
       
-      <a href="{% url 'users:logout' %}" class="action-button logout-button">
+      <a href="{% url 'users:logout' %}" class="action-button logout-button" style="color: white">
         <span class="button-icon">🚪</span> Выйти
       </a>
       
-      <a href="{% url 'users:delete_user' %}" class="action-button delete-button">
-        <span class="button-icon">🗑️</span> Удалить аккаунт
-      </a>
     </div>
   </div>
 </div>

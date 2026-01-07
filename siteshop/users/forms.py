@@ -26,15 +26,12 @@ class RegisterUserForm(UserCreationForm):
         })
     )
 
-    email = forms.EmailField(
-        label='Email',
-        required=False,
-        widget=forms.EmailInput(attrs={
-            'class': 'form-input',
-            'placeholder': 'email@example.com',
-            'autocomplete': 'email'
-        })
-    )
+    email = forms.CharField(label="E-mail",
+                            widget=forms.EmailInput(attrs={
+                                'class': 'form-input',
+                                'placeholder': 'email@example.com',
+                                'autocomplete': 'email'
+                            }))
 
     first_name = forms.CharField(
         label='Имя',

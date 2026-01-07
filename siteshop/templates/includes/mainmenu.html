@@ -37,26 +37,26 @@
                 {% endif %}
 
 
-                {% comment %} {% if title == "Профиль пользователя" %}
-                <li><a class="selected">Профиль | {{ user.first_name }}</a></li>
+                {% if title == "Профиль пользователя" %}
+                <li><a class="selected">Профиль | {{ user.username }}</a></li>
                 {% else %}
-                <li><a href="{% url "users:profile" %}">Профиль | {{ user.first_name }}</a></li>
+                <li><a href="{% url "users:profile" %}">Профиль | {{ user.username }}</a></li>
                 {% endif %}
-                <li><a href="{% url "users:logout" %}">Выйти</a></li> {% endcomment %}
+                <li><a href="{% url "users:logout" %}">Выйти</a></li>
 
             {% else %}
 
-            {% comment %} {% if title == "Авторизация" %}
+            {% if title == "Авторизация" %}
             <li><a class="selected">Войти</a></li>
             {% else %}
             <li><a href="{% url "users:login" %}">Войти</a></li>
-            {% endif %} {% endcomment %}
+            {% endif %} 
 
-            {% comment %} {% if title == "Регистрация" %}
+            {% if title == "Регистрация" %}
             <li><a class="selected">Регистрация</a></li>
             {% else %}
             <li><a href="{% url "users:register" %}">Регистрация</a></li>
-            {% endif %} {% endcomment %}
+            {% endif %}
 
             {% endif %}
 
