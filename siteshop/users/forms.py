@@ -35,7 +35,7 @@ class RegisterUserForm(UserCreationForm):
 
     first_name = forms.CharField(
         label='Имя',
-        required=False,
+        required=True,
         max_length=30,
         widget=forms.TextInput(attrs={
             'class': 'form-input',
@@ -45,7 +45,7 @@ class RegisterUserForm(UserCreationForm):
 
     last_name = forms.CharField(
         label='Фамилия',
-        required=False,
+        required=True,
         max_length=30,
         widget=forms.TextInput(attrs={
             'class': 'form-input',
