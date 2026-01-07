@@ -15,6 +15,13 @@ from django.contrib import messages
 from django.forms.models import model_to_dict
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
+from django.contrib.auth.views import LoginView
+
+
+class LoginUser(LoginView):
+    form_class = LoginForm
+    template_name = 'users/login.html'
+    extra_context = {"title": "Авторизация"}
 
 
 class RegisterUser(CreateView):

@@ -4,76 +4,71 @@
 {% block "content" %}
 <div class="auth-container">
     <div class="auth-card">
-
         <div class="auth-header">
-            {% comment %} <div class="auth-icon">🔐</div> {% endcomment %}
             <h1 class="auth-title">🔐 Вход в систему 🔐</h1>
-            <p class="auth-subtitle">Введите email и пароль</p>
+            <p class="auth-subtitle">Введите логин и пароль</p> 
         </div>
 
-        <form method="post" class="auth-form">
+        <form method="post" class="auth-form" novalidate>
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.GET.next }}">
             
-            {% if error %}
+            {% if form.non_field_errors %}
             <div class="auth-error">
-                {{ error }}
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
             </div>
             {% endif %}
 
-            <div class="input-field">
-                <label for="{{ form.email.id_for_label }}" class="field-label">
-                    Email
-                </label>
-                <input type="email" 
-                       name="{{ form.email.name }}" 
-                       id="{{ form.email.id_for_label }}"
-                       class="field-input"
-                       placeholder="example@mail.com"
-                       required
-                       value="{{ form.email.value|default_if_none:'' }}"
-                       >
-                <style>
-                    #{{ form.email.id_for_label }}::placeholder { color: #969696ab; }
-                </style>
-                {% if form.email.errors %}
+            {% for field in form %}
+            <div class="input-field {% if field.field.widget.input_type == 'checkbox' %}input-field-checkbox{% endif %}">
+                
+                {% if field.field.widget.input_type == 'checkbox' %}
+                    <label class="checkbox-label">
+                        {{ field }}
+                        <span class="checkbox-text">{{ field.label }}</span>
+                    </label>
+                {% else %}
+                    <label for="{{ field.id_for_label }}" class="field-label">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="required">*</span>{% endif %}
+                    </label>
+                    
+                    {% if field.name == 'password' %}
+                    <div class="password-field">
+                        {{ field }}
+                        <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path class="icon" 
+                                      data-show="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" 
+                                      data-hide="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24 M1 1l22 22" 
+                                      d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z">
+                                </path>
+                                <circle class="icon-dot" data-show="12 12 3" data-hide="" cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                {% endif %}
+
+                {% if field.help_text and field.name != 'password' %}
+                <div class="field-help">
+                    {{ field.help_text }}
+                </div>
+                {% endif %}
+
+                {% if field.errors %}
                 <div class="field-error">
-                    {{ form.email.errors }}
+                    {% for error in field.errors %}
+                        {{ error }}
+                    {% endfor %}
                 </div>
                 {% endif %}
             </div>
-
-            <div class="input-field">
-                <label for="{{ form.password.id_for_label }}" class="field-label">
-                    Пароль
-                </label>
-                <div class="password-field">
-                    <input type="password" 
-                           name="{{ form.password.name }}" 
-                           id="{{ form.password.id_for_label }}"
-                           class="field-input"
-                           placeholder="••••••••"
-                           required>
-                    <style>
-                    #{{ form.password.id_for_label }}::placeholder { color: #969696ab; }
-                </style>
-<button type="button" class="password-toggle" onclick="togglePassword(this)">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path class="icon" data-show="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 5c-7 0-11 8-11 8 0 0 4 8 11 8 7 0 11-8 11-8 0 0-4-8-11-8z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" 
-              data-hide="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24 M1 1l22 22" 
-              d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z">
-        </path>
-        <circle class="icon-dot" data-show="12 12 3" data-hide="" cx="12" cy="12" r="3"></circle>
-    </svg>
-</button>
-                </div>
-                {% if form.password.errors %}
-                <div class="field-error">
-                    {{ form.password.errors }}
-                </div>
-                {% endif %}
-            </div>
-
+            {% endfor %}
 
             <button type="submit" class="auth-button">
                 Войти
@@ -82,10 +77,10 @@
             <div class="auth-links">
                 <p>
                     Нет аккаунта? 
-                    <a href="{% url "users:register" %}" class="link">Зарегистрироваться</a>
+                    <a href="{% url 'users:register' %}" class="link">Зарегистрироваться</a>
                 </p>
                 <p>
-                    <a href="#" class="link">Забыли пароль?</a>
+                    {% comment %} <a href="{% url 'password_reset' %}" class="link">Забыли пароль?</a> {% endcomment %}
                 </p>
             </div>
         </form>
@@ -94,7 +89,7 @@
 
 <script>
 function togglePassword(button) {
-    const input = button.parentElement.querySelector('input[type="password"], input[type="text"]');
+    const input = button.parentElement.querySelector('input');
     const path = button.querySelector('.icon');
     const circle = button.querySelector('.icon-dot');
     
@@ -106,16 +101,31 @@ function togglePassword(button) {
         circle.setAttribute('r', '');
     } else {
         input.type = 'password';
-        path.setAttribute('d', path.getAttribute('data-show').split(' M')[0]);
-        const coords = path.getAttribute('data-show').split(' M')[2].split(' ');
-        circle.setAttribute('cx', coords[0]);
-        circle.setAttribute('cy', coords[1]);
-        circle.setAttribute('r', coords[2]);
+        const dataShow = path.getAttribute('data-show');
+        if (dataShow.includes(' M')) {
+            path.setAttribute('d', dataShow.split(' M')[0]);
+            const coords = dataShow.split(' M')[2].split(' ');
+            if (coords.length >= 3) {
+                circle.setAttribute('cx', coords[0]);
+                circle.setAttribute('cy', coords[1]);
+                circle.setAttribute('r', coords[2]);
+            }
+        } else {
+            path.setAttribute('d', dataShow);
+        }
     }
 }
 
+// Автофокус на поле логина
+document.addEventListener('DOMContentLoaded', function() {
+    const usernameInput = document.querySelector('input[name="username"]');
+    if (usernameInput) {
+        usernameInput.focus();
+    }
+});
 
-document.querySelectorAll('.field-input').forEach(input => {
+// Валидация
+document.querySelectorAll('.form-input').forEach(input => {
     input.addEventListener('focus', function() {
         this.parentElement.classList.add('focused');
     });
@@ -123,6 +133,11 @@ document.querySelectorAll('.field-input').forEach(input => {
     input.addEventListener('blur', function() {
         if (!this.value) {
             this.parentElement.classList.remove('focused');
+        }
+        if (this.value && !this.validity.valid) {
+            this.classList.add('invalid');
+        } else {
+            this.classList.remove('invalid');
         }
     });
 });
