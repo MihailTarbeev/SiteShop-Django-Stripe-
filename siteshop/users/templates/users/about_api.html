@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block "content" %}
+
+<h1>Про API</h1>
+<p>На сайте реализована возможность обращения к правилам доступа по API.</p>
+<p>Такая возможность доступна только администратору.</p>
+<p>Доступны следующие endpoints:</p>
+<ul>
+    <li>GET запрос (/users/api/v1/rules/)  -   <a href={% url "users:api_rules" %} style="color:blue">Получение списка правил</a></li>
+    <li>GET запрос (/users/api/v1/rules/&lt;pk&gt)  -   <a href={% url "users:api_rule_detail" 1 %} style="color:blue">Получение конкретного правила по pk</a></li>
+    <li>POST запрос (/users/api/v1/rules/&lt;pk&gt)  -   <a href={% url "users:api_rule_detail" 1 %} style="color:blue">Изменение конкретного правила по pk</a></li>
+</ul>
+
+{% endblock %}

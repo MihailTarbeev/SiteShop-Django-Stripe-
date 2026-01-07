@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block "content" %}
+<div id="item-detail-page">
+    <div class="item-detail-card">
+        {% block confirm_delete %}{% endblock %}
+        <div class="item-header">
+            <div class="item-image-container">
+                {% if item.image %}
+                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="item-main-image">
+                {% else %}
+                <img src="{{ default_image }}" alt="Изображение отсутствует" class="item-main-image">
+                {% endif %}
+            </div>
+            
+            <div class="item-info">
+                <h1 class="item-title">{{ item.name }}</h1>
+                
+                <div class="item-price-section">
+                    <span class="item-price">{{ item.price }} ₽</span>
+                    {% if item.old_price %}
+                    <span class="item-old-price">{{ item.old_price }} ₽</span>
+                    {% endif %}
+                </div>
+                
+                <div class="seller-info">
+                    <div class="seller-label">Продавец:</div>
+                    <div class="seller-name">{{ item.owner.first_name }}</div>
+                </div>
+                
+                <div class="item-actions">
+                    <a href="{% url "edit_item" item.slug %}" class="edit-btn">
+                        <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                        </svg>
+                        <span>Редактировать</span>
+                    </a>
+                    
+                    {% comment %} <button class="contact-btn">
+                        <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2Z"/>
+                        </svg>
+                        <span>Написать продавцу</span>
+                    </button> {% endcomment %}
+                <a href="{% url "delete_item" item.slug %}" class="delete-btn">
+                    <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16">
+                        <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                    </svg>
+                    <span>Удалить товар</span>
+                </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="item-description-section">
+            <h2 class="section-title">Описание</h2>
+            <div class="item-description">
+                {{ item.description|linebreaks }}
+            </div>
+        </div>
+        
+        <div class="item-details">
+            <div class="detail-item">
+                <span class="detail-label">Дата создания:</span>
+                <span class="detail-value">{{ item.created_at|date:"d.m.Y" }}</span>
+            </div>
+            {% if item.category %}
+            <div class="detail-item">
+                <span class="detail-label">Категория:</span>
+                <span class="detail-value">{{ item.category }}</span>
+            </div>
+            {% endif %}
+            
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    const elements = document.querySelectorAll('.item-detail-card > *');
+    elements.forEach((el, index) => {
+        el.style.animationDelay = `${index * 0.1}s`;
+        el.style.animation = 'fadeIn 0.5s ease forwards';
+        el.style.opacity = '0';
+    });
+});
+</script>
+{% endblock %}

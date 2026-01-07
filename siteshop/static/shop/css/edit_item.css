@@ -1,0 +1,270 @@
+
+#edit-item-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        /* background: #fafafa; */
+    }
+    
+#edit-item-page .edit-item-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        width: 100%;
+        max-width: 700px;
+        border: 1px solid #eee;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+#edit-item-page .edit-item-title {
+        text-align: center;
+        margin: 0 0 30px 0;
+        color: #2c3e50;
+        font-size: 24px;
+        font-weight: 600;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+    }
+    
+#edit-item-page .item-preview {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        border: 1px solid #eee;
+    }
+    
+#edit-item-page .item-name {
+        margin: 0 0 15px 0;
+        color: #34495e;
+        font-size: 18px;
+        font-weight: 500;
+        text-align: center;
+    }
+    
+#edit-item-page .item-image-container {
+        text-align: center;
+    }
+    
+#edit-item-page .item-image {
+        max-width: 100%;
+        height: 200px;
+        object-fit: contain;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        background: white;
+        padding: 10px;
+    }
+    
+#edit-item-page .edit-item-form {
+        width: 100%;
+    }
+    
+#edit-item-page .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    @media (min-width: 768px) {
+        .form-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .form-group:has(textarea),
+        .form-group:fullscreen {
+            grid-column: span 2;
+        }
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .required {
+        color: #e74c3c;
+    }
+    
+    .edit-item-form input[type="text"],
+    .edit-item-form input[type="number"],
+    .edit-item-form input[type="file"],
+    .edit-item-form select,
+    .edit-item-form textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+        background: white;
+        color: #2c3e50;
+        font-family: inherit;
+    }
+    
+    .edit-item-form input[type="text"]:focus,
+    .edit-item-form input[type="number"]:focus,
+    .edit-item-form select:focus,
+    .edit-item-form textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+    
+    .edit-item-form input[type="file"] {
+        padding: 8px;
+        border: 2px dashed #ddd;
+        background: #fafafa;
+        cursor: pointer;
+    }
+    
+    .edit-item-form input[type="file"]:hover {
+        border-color: #3498db;
+        background: #f0f7ff;
+    }
+    
+    .edit-item-form textarea {
+        min-height: 120px;
+        resize: vertical;
+        line-height: 1.5;
+    }
+    
+    .textarea-wrapper {
+        position: relative;
+    }
+    
+    .char-count {
+        position: absolute;
+        bottom: 8px;
+        right: 12px;
+        font-size: 12px;
+        color: #95a5a6;
+        background: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+    }
+    
+    .help-text {
+        color: #7f8c8d;
+        font-size: 12px;
+        margin-top: 5px;
+        line-height: 1.4;
+    }
+    
+    .field-errors {
+        color: #e74c3c;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    
+    .error {
+        display: block;
+        padding: 3px 0;
+    }
+    
+    .form-errors {
+        color: #e74c3c;
+        font-size: 14px;
+        margin-bottom: 20px;
+        padding: 10px;
+        background: #ffeaea;
+        border-radius: 6px;
+        border-left: 4px solid #e74c3c;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        border-top: 1px solid #eee;
+        padding-top: 25px;
+    }
+    
+    .submit-btn, .cancel-btn {
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        border: none;
+        min-width: 200px;
+    }
+    
+    .submit-btn {
+        background: #27ae60;
+        color: white;
+    }
+    
+    .submit-btn:hover {
+        background: #219955;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+    }
+    
+    .cancel-btn {
+        background: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+    }
+    
+    .cancel-btn:hover {
+        background: #e9ecef;
+        color: #495057;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .btn-icon {
+        transition: transform 0.2s ease;
+    }
+    
+    .submit-btn:hover .btn-icon {
+        transform: scale(1.1);
+    }
+    
+    .cancel-btn:hover .btn-icon {
+        transform: rotate(90deg);
+    }
+    
+    /* Анимация появления */
+    .edit-item-card {
+        animation: slideUp 0.4s ease;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Стилизация для выбранного файла */
+    .file-selected {
+        background: #e8f5e9 !important;
+        border-color: #27ae60 !important;
+        color: #27ae60 !important;
+    }

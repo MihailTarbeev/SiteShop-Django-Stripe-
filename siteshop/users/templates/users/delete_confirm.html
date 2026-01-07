@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block "content" %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h1 class="mb-0">Удаление аккаунта</h1>
+                </div>
+                <div>
+                    <div>
+                        <h5>Внимание!</h5>
+                        <p>Вы собираетесь удалить свой аккаунт. Это действие приведет к:</p>
+                        <ul>
+                            <li>Невозможности входа в систему</li>
+                            <li>Сохранению ваших данных в базе с пометкой "неактивен"</li>
+                            <li>Выходу из всех активных сессий</li>
+                        </ul>
+                        <p>Это действие <strong>необратимо</strong>.</p>
+                        <p>Для восстановления профиля необходимо будет обратиться к <strong>администратору</strong>.</p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" 
+                                   id="confirm_delete" name="confirm_delete" required>
+                            <label class="form-check-label" for="confirm_delete">
+                                <strong>Я понимаю последствия и хочу удалить свой аккаунт</strong>
+                            </label>
+                        </div>
+                        <br>
+                        <div class="d-flex justify-content-between">
+                            <button><a href="{% url 'users:profile' %}" class="btn btn-secondary">
+                                Отмена
+                            </a></button>
+                            <button style="background-color:red; color:white" type="submit" class="btn btn-danger" 
+                                    onclick="return confirm('Вы уверены? Это действие нельзя отменить.')">
+                                Удалить аккаунт
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

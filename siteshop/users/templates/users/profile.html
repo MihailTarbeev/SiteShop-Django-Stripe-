@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% load static %}
+{% block "content" %}
+
+  <div class="profile-container">
+  <h2 class="profile-title">Профиль</h2>
+  
+  <div class="profile-card">
+    <form action="" method="POST" enctype="multipart/form-data" class="profile-form">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      
+      <div class="avatar-section">
+        <div class="avatar-container">
+          {% if user.photo %}
+          <img src="{{ user.photo.url }}" alt="Аватар" class="avatar-image" />
+          {% else %}
+          <img src="{{ default_user_image }}" alt="Аватар" class="avatar-image" />
+          {% endif %}
+        </div>
+        
+        <div class="photo-upload-wrapper">
+          <label for="id_photo" class="photo-upload-label">
+            <span class="upload-icon">🖼️</span> Изменить фото
+            {{ form.photo }}
+          </label>
+          <div class="form-error photo-error">
+            {{ form.photo.errors }}
+          </div>
+        </div>
+      </div>
+
+        <p>{{ form.non_field_errors }}</p>
+
+
+
+<div class="form-fields-grid">
+    {% for field in form %}
+        {% if field.name != 'photo' %}
+        <div class="form-group {% if field.name == 'username' or field.name == 'email' %}disabled-field{% endif %}">
+            <label for="{{ field.id_for_label }}" class="form-label">
+                {{ field.label }}
+                {% if field.field.required %}
+                    <span class="required-star">*</span>
+                {% endif %}
+                
+                {% if field.field.disabled %}
+                    <span class="disabled-icon" title="Это поле нельзя изменить">🔒</span>
+                {% endif %}
+            </label>
+            
+            {% if field.name == 'email' %}
+                <div class="disabled-input-wrapper">
+                    <input type="email" name="{{ field.name }}" 
+                           id="{{ field.id_for_label }}" 
+                           value="{{ field.value|default_if_none:'' }}"
+                           class="form-input email-input {% if field.field.disabled %}disabled-input{% endif %}"
+                           {% if field.field.disabled %}disabled{% endif %}>
+                    {% if field.field.disabled %}
+                        <div class="disabled-hint">
+                            <small>Email нельзя изменить после регистрации</small>
+                        </div>
+                    {% endif %}
+                </div>
+            {% elif field.name == 'username' %}
+                <div class="disabled-input-wrapper">
+                    <input type="text" name="{{ field.name }}" 
+                           id="{{ field.id_for_label }}" 
+                           value="{{ field.value|default_if_none:'' }}"
+                           class="form-input text-input {% if field.field.disabled %}disabled-input{% endif %}"
+                           {% if field.field.disabled %}disabled{% endif %}>
+                    {% if field.field.disabled %}
+                        <div class="disabled-hint">
+                            <small>Логин нельзя изменить после регистрации</small>
+                        </div>
+                    {% endif %}
+                </div>
+            {% elif field.field.widget.input_type == 'text' %}
+                <input type="text" name="{{ field.name }}" 
+                       id="{{ field.id_for_label }}" 
+                       value="{{ field.value|default_if_none:'' }}"
+                       class="form-input text-input {% if field.field.disabled %}disabled-input{% endif %}"
+                       {% if field.field.disabled %}disabled{% endif %}>
+            {% elif field.field.widget.input_type == 'textarea' %}
+                <textarea name="{{ field.name }}" 
+                          id="{{ field.id_for_label }}" 
+                          class="form-textarea {% if field.field.disabled %}disabled-input{% endif %}"
+                          {% if field.field.disabled %}disabled{% endif %}>{{ field.value|default_if_none:'' }}</textarea>
+            {% elif field.field.widget.input_type == 'select' %}
+                <select name="{{ field.name }}" 
+                        id="{{ field.id_for_label }}"
+                        class="form-select {% if field.field.disabled %}disabled-input{% endif %}"
+                        {% if field.field.disabled %}disabled{% endif %}>
+                    {% for choice in field.field.choices %}
+                        <option value="{{ choice.0 }}" {% if field.value == choice.0 %}selected{% endif %}>
+                            {{ choice.1 }}
+                        </option>
+                    {% endfor %}
+                </select>
+            {% elif field.field.widget.input_type == 'file' %}
+
+            {% else %}
+                {{ field }}
+            {% endif %}
+            
+            {% if field.help_text %}
+                <div class="form-help-text">
+                    {{ field.help_text }}
+                </div>
+            {% endif %}
+            
+            <div class="form-error field-error">
+                {{ field.errors }}
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+      <div class="form-submit-section">
+        <button type="submit" class="submit-button">
+          <span class="button-icon">💾</span> Сохранить изменения
+        </button>
+      </div>
+    </form>
+
+    <hr class="section-divider">
+    
+    <div class="action-buttons">
+      <a href="" class="action-button password-button">
+        <span class="button-icon">🔑</span> Сменить пароль
+      </a>
+      
+      <a href="{% url 'users:logout' %}" class="action-button logout-button">
+        <span class="button-icon">🚪</span> Выйти
+      </a>
+      
+      <a href="{% url 'users:delete_user' %}" class="action-button delete-button">
+        <span class="button-icon">🗑️</span> Удалить аккаунт
+      </a>
+    </div>
+  </div>
+</div>
+            <hr>
+            {% if object.items.all.count > 0 %}
+              <h3><span>Ваши товары</span></h3> 
+
+              <div style="
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 20px;
+                  justify-content: flex-start;
+              ">
+                  {% for item in object.items.all %}
+                  <div class="col col_14 product_gallery" style="
+                      width: calc(25% - 15px); 
+                      min-width: 100px; /* Минимальная ширина */
+                      text-align: center;
+                      padding: 15px;
+                      border: 1px solid #eee;
+                      border-radius: 8px;
+                      background: white;
+                      display: flex;
+                      flex-direction: column;
+                      box-sizing: border-box;
+                      min-height: 200px;
+                  ">
+                      
+                      {% if item.image %}
+                      <a href="{{ item.get_absolute_url }}">
+                          <img src="{{ item.image.url }}" style="width: 100%; height: 100px; object-fit: contain;"/>
+                      </a>
+                      {% else %}
+                      <a href="{{ item.get_absolute_url }}">
+                          <img src="{{ default_item_image }}" style="width: 100%; height: 100px; object-fit: contain;"/>
+                      </a>
+                      {% endif %}
+
+                      <div style="flex: 1; width: 100%; padding-top: 10px;">
+                          <h2 style="margin: 0 0 8px; min-height: 40px;">
+                              <a href="{{ item.get_absolute_url }}" style="color: blue; font-size: 15px; text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                  {{ item.name }}
+                              </a>
+                          </h2>
+                          
+                          <p style="margin: 8px 0; color: #666; line-height: 1.4; font-size: 13px; min-height: 50px; max-height: 70px; overflow: hidden;">
+                              {{ item.description|truncatechars:45 }}
+                          </p>
+                      </div>
+
+                      <div style="width: 100%; margin-top: auto;">
+                          <p class="product_price" style="font-size: 16px; font-weight: bold; color: #d32f2f; margin: 10px 0;">
+                              {{ item.price }} ₽
+                          </p>
+                      </div>
+                  </div>
+                  {% endfor %}
+              </div>
+
+            {% else %}
+              <h3><span>Вы пока не добавили ни один товар</span></h3>
+            {% endif %}
+
+          </form>
+
+{% endblock %}

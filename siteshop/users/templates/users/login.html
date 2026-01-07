@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block "content" %}
+<div class="auth-container">
+    <div class="auth-card">
+
+        <div class="auth-header">
+            {% comment %} <div class="auth-icon">🔐</div> {% endcomment %}
+            <h1 class="auth-title">🔐 Вход в систему 🔐</h1>
+            <p class="auth-subtitle">Введите email и пароль</p>
+        </div>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+            
+            {% if error %}
+            <div class="auth-error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <div class="input-field">
+                <label for="{{ form.email.id_for_label }}" class="field-label">
+                    Email
+                </label>
+                <input type="email" 
+                       name="{{ form.email.name }}" 
+                       id="{{ form.email.id_for_label }}"
+                       class="field-input"
+                       placeholder="example@mail.com"
+                       required
+                       value="{{ form.email.value|default_if_none:'' }}"
+                       >
+                <style>
+                    #{{ form.email.id_for_label }}::placeholder { color: #969696ab; }
+                </style>
+                {% if form.email.errors %}
+                <div class="field-error">
+                    {{ form.email.errors }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="input-field">
+                <label for="{{ form.password.id_for_label }}" class="field-label">
+                    Пароль
+                </label>
+                <div class="password-field">
+                    <input type="password" 
+                           name="{{ form.password.name }}" 
+                           id="{{ form.password.id_for_label }}"
+                           class="field-input"
+                           placeholder="••••••••"
+                           required>
+                    <style>
+                    #{{ form.password.id_for_label }}::placeholder { color: #969696ab; }
+                </style>
+<button type="button" class="password-toggle" onclick="togglePassword(this)">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path class="icon" data-show="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 5c-7 0-11 8-11 8 0 0 4 8 11 8 7 0 11-8 11-8 0 0-4-8-11-8z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" 
+              data-hide="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24 M1 1l22 22" 
+              d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z">
+        </path>
+        <circle class="icon-dot" data-show="12 12 3" data-hide="" cx="12" cy="12" r="3"></circle>
+    </svg>
+</button>
+                </div>
+                {% if form.password.errors %}
+                <div class="field-error">
+                    {{ form.password.errors }}
+                </div>
+                {% endif %}
+            </div>
+
+
+            <button type="submit" class="auth-button">
+                Войти
+            </button>
+
+            <div class="auth-links">
+                <p>
+                    Нет аккаунта? 
+                    <a href="{% url "users:register" %}" class="link">Зарегистрироваться</a>
+                </p>
+                <p>
+                    <a href="#" class="link">Забыли пароль?</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function togglePassword(button) {
+    const input = button.parentElement.querySelector('input[type="password"], input[type="text"]');
+    const path = button.querySelector('.icon');
+    const circle = button.querySelector('.icon-dot');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        path.setAttribute('d', path.getAttribute('data-hide'));
+        circle.setAttribute('cx', '');
+        circle.setAttribute('cy', '');
+        circle.setAttribute('r', '');
+    } else {
+        input.type = 'password';
+        path.setAttribute('d', path.getAttribute('data-show').split(' M')[0]);
+        const coords = path.getAttribute('data-show').split(' M')[2].split(' ');
+        circle.setAttribute('cx', coords[0]);
+        circle.setAttribute('cy', coords[1]);
+        circle.setAttribute('r', coords[2]);
+    }
+}
+
+
+document.querySelectorAll('.field-input').forEach(input => {
+    input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+    });
+    
+    input.addEventListener('blur', function() {
+        if (!this.value) {
+            this.parentElement.classList.remove('focused');
+        }
+    });
+});
+</script>
+{% endblock %}

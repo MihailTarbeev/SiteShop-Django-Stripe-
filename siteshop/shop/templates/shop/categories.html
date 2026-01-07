@@ -1,0 +1,31 @@
+{% if categories %}
+<h3>Категории</h3>
+            <ul class="sidebar_menu">
+            {% if category_selected == 0 %}
+			<li><a class="active" style='color: #2607ebff'>Все категории</a></li>
+            {% else %}
+            <li><a href="{% url 'home' %}">Все категории {{category.id}}</a></li>
+            {% endif %}
+
+            {% for category in categories %}
+                {% if category.id == category_selected %}
+                <li class="active" style='color: #2607ebff'>{{ category.name }}</li>
+                    {% else %}
+                <li><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
+                {% endif %}
+            {% endfor %}
+			</ul>
+
+            {% comment %} <h3>Newsletter</h3>
+            <p>Praesent aliquam mi id tellus pretium pulvinar in vel ligula.</p>
+            <div id="newsletter">
+                <form action="#" method="get">
+                  <input type="text" value="Subscribe" name="email_newsletter" id="email_newsletter" title="email_newsletter" onfocus="clearText(this)" onblur="clearText(this)" class="txt_field" />
+                  <input type="submit" name="subscribe" value="Subscribe" alt="Subscribe" id="subscribebtn" title="Subscribe" class="subscribebtn"  />
+                </form>
+                <div class="cleaner"></div>
+            </div> {% endcomment %}
+{% endif %}
+
+
+        

@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static %}
+{% load shop_tags %}
+
+{% block menu_products %}
+
+{% if items.count > 5 %}
+
+<div id="SlideItMoo_outer">	
+                <div id="SlideItMoo_inner">			
+                    <div id="SlideItMoo_items">
+                        
+                    {% shuffled_items items as shuffled_items %}
+                    {% for item in shuffled_items %}
+                    {% if item.image %}
+                    <div class="SlideItMoo_element">
+                        
+                        <a href="{{ item.get_absolute_url }}">
+                        <img src={{ item.image.url }} height=100 /></a>
+
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+
+                        </div>
+                    </div>			
+                </div>
+            </div>
+
+{% endif %}
+
+{% endblock %}
+
+
+{% block "content" %}
+
+<div style="
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    align-items: start;  <!-- Ключевое изменение! -->
+">
+
+{% for item in items %}
+<div class="col col_14 product_gallery" style="
+    width: 100%;
+    text-align: center;
+    padding: 20px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    height: 400px;  <!-- Замени min-height на height -->
+">
+    
+    {% if item.image %}
+    <a href="{{ item.get_absolute_url }}">
+        <img src="{{ item.image.url }}" style="width: 100%; height: 150px; object-fit: contain;"/>
+    </a>
+    {% else %}
+    <a href="{{ item.get_absolute_url }}">
+        <img src="{{ default_image }}" style="width: 100%; height: 150px; object-fit: contain;"/>
+    </a>
+    {% endif %}
+
+    <div style="flex: 1; width: 100%; padding-top: 15px; overflow: hidden;">
+        <h2 style="margin: 0 0 10px; min-height: 45px; overflow: hidden;">
+            <a href="{{ item.get_absolute_url }}" style="color: blue; font-size: 16px; text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                {{ item.name }}
+            </a>
+        </h2>
+        <p style="
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: normal;
+            max-width: 100%;
+            line-height: 1.5;
+        ">{{ item.description|truncatechars:35 }}</p>
+
+    </div>
+
+    <div style="width: 100%; margin-top: auto;">
+        <p style="margin: 10px 0; font-size: 14px;">
+            <strong>Продавец:</strong> {{ item.owner.first_name }}
+        </p>
+        <p class="product_price" style="font-size: 18px; font-weight: bold; color: #d32f2f; margin: 15px 0;">
+            {{ item.price }} ₽
+        </p>
+    </div>
+
+</div>        	
+{% endfor %}
+</div>
+
+{% endblock %}
+
+
+{% comment %} <div class="col col_14 product_gallery">
+            	<a href="productdetail.html"><img src="{% static 'shop/images/product/01.jpg' %}" alt="Product 01" /></a>
+                <h3>Ut eu feugiat</h3>
+                <p class="product_price">$ 100</p>
+                <a href="shoppingcart.html" class="add_to_cart">Add to Cart</a>
+            </div>        	
+            <div class="col col_14 product_gallery">
+            	<a href="productdetail.html"><img src="{% static 'shop/images/product/02.jpg' %}" alt="Product 02" /></a>
+                <h3>Curabitur et turpis</h3>
+                <p class="product_price">$ 200</p>
+                <a href="shoppingcart.html" class="add_to_cart">Add to Cart</a>
+            </div>        	
+            <div class="col col_14 product_gallery no_margin_right">
+            	<a href="productdetail.html"><img src="{% static 'shop/images/product/03.jpg' %}" alt="Product 03" /></a>
+                <h3>Mauris consectetur</h3>
+                <p class="product_price">$ 120</p>
+                <a href="shoppingcart.html" class="add_to_cart">Add to Cart</a>
+            </div>        	
+            <div class="col col_14 product_gallery">
+            	<a href="productdetail.html"><img src="{% static 'shop/images/product/04.jpg' %}" alt="Product 04" /></a>
+                <h3>Proin volutpat</h3>
+                <p class="product_price">$ 260</p>
+                <a href="shoppingcart.html" class="add_to_cart">Add to Cart</a>
+            </div>        	
+            <div class="col col_14 product_gallery">
+            	<a href="productdetail.html"><img src="{% static 'shop/images/product/05.jpg' %}" alt="Product 05" /></a>
+                <h3>Aenean tempus</h3>
+                <p class="product_price">$ 80</p>
+                <a href="shoppingcart.html" class="add_to_cart">Add to Cart</a>
+            </div>        	
+            <div class="col col_14 product_gallery no_margin_right">
+            	<a href="productdetail.html"><img src="{% static 'shop/images/product/06.jpg' %}" alt="Product 06" /></a>
+                <h3>Nulla luctus urna</h3>
+                <p class="product_price">$ 193</p>
+                <a href="shoppingcart.html" class="add_to_cart">Add to Cart</a>
+            </div>        	
+            <div class="col col_14 product_gallery">
+            	<a href="productdetail.html"><img src="{% static 'shop/images/product/07.jpg' %}" alt="Product 07" /></a>
+                <h3>Pellentesque egestas</h3>
+                <p class="product_price">$ 30</p>
+                <a href="shoppingcart.html" class="add_to_cart">Add to Cart</a>
+            </div>        	
+            <div class="col col_14 product_gallery">
+            	<a href="productdetail.html"><img src="{% static 'shop/images/product/08.jpg' %}" alt="Product 08" /></a>
+                <h3>Suspendisse porttitor</h3>
+                <p class="product_price">$ 220</p>
+                <a href="shoppingcart.html" class="add_to_cart">Add to Cart</a>
+            </div>        	
+            <div class="col col_14 product_gallery no_margin_right">
+            	<a href="productdetail.html"><img src="{% static 'shop/images/product/09.jpg' %}" alt="Product 09" /></a>
+                <h3>Nam vehicula</h3>
+                <p class="product_price">$ 65</p>
+                <a href="shoppingcart.html" class="add_to_cart">Add to Cart</a>
+            </div> {% endcomment %}

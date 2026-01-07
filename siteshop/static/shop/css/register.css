@@ -1,0 +1,248 @@
+/* Стили ТОЛЬКО для страницы регистрации */
+#register-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    /* background: #fafafa; */
+}
+
+#register-page .register-form {
+    background: white;
+    border-radius: 8px;
+    padding: 30px 25px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 380px; /* Уменьшил на 20px для отступов */
+    border: 1px solid #eee;
+    box-sizing: border-box; /* Важно! */
+}
+
+/* Используем более специфичные селекторы */
+#register-page h1.register-title {
+    text-align: center;
+    margin: 0 0 25px 0;
+    color: #333;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+/* Для всех полей формы внутри #register-page */
+#register-page .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#register-page .form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+#register-page .form-label {
+    font-weight: 500;
+    color: #34495e;
+    margin-bottom: 4px;
+    font-size: 13px;
+    line-height: 1.2;
+}
+
+/* Компактные поля - УБРАЛ ДУБЛИРУЮЩИЙ СТИЛЬ! */
+#register-page .form-group input {
+    padding: 6px 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    background: #fff;
+    color: #2c3e50;
+    width: 100%;
+    box-sizing: border-box; /* Важно! */
+    height: 34px;
+}
+
+#register-page .form-group input:focus {
+    outline: none;
+    border-color: #3498db;
+    background: white;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+#register-page .form-group input::placeholder {
+    color: #95a5a6;
+    font-size: 12px;
+    opacity: 1;
+}
+
+#register-page .password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+#register-page .password-wrapper input {
+    flex: 1;
+    padding-right: 35px;
+}
+
+#register-page .toggle-password {
+    position: absolute;
+    right: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #7f8c8d;
+    font-size: 14px;
+    padding: 0;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+#register-page .toggle-password:hover {
+    color: #3498db;
+}
+
+#register-page .help-text {
+    color: #7f8c8d;
+    font-size: 10px;
+    margin-top: 2px;
+    line-height: 1.2;
+}
+
+#register-page .form-error {
+    color: #e74c3c;
+    font-size: 10px;
+    margin-top: 2px;
+    min-height: 14px;
+    word-break: break-word;
+}
+
+#register-page .submit-btn {
+    width: 100%;
+    padding: 8px 12px; /* Добавил боковые паддинги */
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    margin-bottom: 15px;
+    height: 36px;
+    box-sizing: border-box; /* Важно! */
+}
+
+#register-page .submit-btn:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(52, 152, 219, 0.2);
+}
+
+#register-page .submit-btn:active {
+    transform: translateY(0);
+}
+
+#register-page .btn-icon {
+    transition: transform 0.2s ease;
+}
+
+#register-page .submit-btn:hover .btn-icon {
+    transform: translateX(2px);
+}
+
+#register-page .login-link {
+    text-align: center;
+    color: #7f8c8d;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+#register-page .login-link a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+#register-page .login-link a:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+/* Стили для ошибок валидации */
+#register-page .form-group input:invalid {
+    border-color: #e74c3c;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 480px) {
+    #register-page .register-form {
+        padding: 20px 18px; /* Увеличил боковые паддинги */
+        border-radius: 10px;
+        max-width: 95%; /* Оставим отступы по бокам */
+        margin: 0 10px; /* Добавил внешние отступы */
+    }
+    
+    #register-page h1.register-title {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+    
+    #register-page .form-grid {
+        gap: 8px;
+    }
+    
+    #register-page .form-group input {
+        height: 32px;
+        font-size: 13px;
+        padding: 5px 10px; /* Увеличил боковые паддинги */
+    }
+    
+    #register-page .submit-btn {
+        height: 34px;
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+}
+
+/* Анимация появления */
+#register-page .register-form {
+    animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Убедимся, что контейнер формы имеет правильную ширину */
+#register-page .register-form-inner {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Дополнительная гарантия, что ничего не вылезает */
+#register-page * {
+    box-sizing: border-box;
+    max-width: 100%;
+}

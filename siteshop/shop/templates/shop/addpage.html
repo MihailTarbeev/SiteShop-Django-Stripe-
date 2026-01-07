@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block "content" %}
+<div id="add-item-page">
+    <div class="add-item-card">
+        <h1 class="add-item-title">Добавление нового товара</h1>
+        
+        <form action="" method="POST" enctype="multipart/form-data" class="add-item-form">
+            {% csrf_token %}
+            
+            <div>{{ form.non_field_errors }}</div>
+            
+            <div class="form-grid">
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}" class="form-label">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="required">*</span>{% endif %}
+                    </label>
+                    
+                    {% if field.name == 'description' %}
+                    <div class="textarea-wrapper">
+                        {{ field }}
+                        <div class="char-count" id="char-count-{{ field.name }}"></div>
+                    </div>
+                    {% elif field.name == 'image' %}
+                    <div class="file-upload-wrapper">
+                        <label class="file-upload-label">
+                            {{ field }}
+                            <span class="file-upload-text">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="20" height="20">
+                                    <path fill="currentColor" d="M14,13V17H10V13H7L12,8L17,13H14M22,16A2,2 0 0,1 20,18H4A2,2 0 0,1 2,16V12H4V16H20V12H22V16Z"/>
+                                </svg>
+                                <span class="file-upload-placeholder">Выберите изображение...</span>
+                            </span>
+                        </label>
+                        <div class="file-preview" id="file-preview"></div>
+                    </div>
+                    {% else %}
+                    {{ field }}
+                    {% endif %}
+                    
+                    {% if field.help_text %}
+                    <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                    <div class="field-errors">
+                        {% for error in field.errors %}
+                        <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="submit-btn create-btn">
+                    <svg class="btn-icon" viewBox="0 0 24 24" width="18" height="18">
+                        <path fill="currentColor" d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                    </svg>
+                    <span>Создать товар</span>
+                </button>
+                
+                <a href="{% url 'home' %}" class="cancel-btn">
+                    <svg class="btn-icon" viewBox="0 0 24 24" width="18" height="18">
+                        <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                    </svg>
+                    <span>Отмена</span>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const textareas = document.querySelectorAll('textarea');
+    
+    textareas.forEach(textarea => {
+        const charCount = document.getElementById(`char-count-${textarea.name}`);
+        if (charCount) {
+            charCount.textContent = `${textarea.value.length} символов`;
+            
+            textarea.addEventListener('input', function() {
+                charCount.textContent = `${this.value.length} символов`;
+            });
+        }
+    });
+    
+    const fileInput = document.querySelector('input[type="file"]');
+    const filePreview = document.getElementById('file-preview');
+    const fileUploadText = document.querySelector('.file-upload-text .file-upload-placeholder');
+    
+    if (fileInput && filePreview) {
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                fileUploadText.textContent = file.name;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    filePreview.innerHTML = `
+                        <img src="${e.target.result}" alt="Предпросмотр">
+                        <div style="margin-top: 10px; font-size: 13px; color: #7f8c8d;">
+                            Размер: ${(file.size / 1024).toFixed(1)} KB
+                        </div>
+                    `;
+                    filePreview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                fileUploadText.textContent = 'Выберите изображение...';
+                filePreview.style.display = 'none';
+                filePreview.innerHTML = '';
+            }
+        });
+    }
+    
+    const firstInput = document.querySelector('.add-item-form input:not([type="hidden"])');
+    if (firstInput) {
+        firstInput.focus();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block "content" %}
+<div id="edit-item-page">
+    <div class="edit-item-card">
+        <h1 class="edit-item-title">Редактирование товара</h1>
+        
+        <div class="item-preview" style="margin-bottom: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; display: flex; flex-direction: column; align-items: center;">
+            <h3 class="item-name">{{ item.name }}</h3>
+            
+            <div class="item-image-container">
+                {% if item.image %}
+                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="item-image">
+                {% else %}
+                <img src="{{ default_image }}" alt="Изображение отсутствует" class="item-image">
+                {% endif %}
+            </div>
+        </div>
+
+        <form action="" method="POST" enctype="multipart/form-data" class="edit-item-form">
+            {% csrf_token %}
+            
+            <div>{{ form.non_field_errors }}</div>
+            
+            <div class="form-grid">
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}" class="form-label">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="required">*</span>{% endif %}
+                    </label>
+                    
+                    {% if field.name == 'description' %}
+                    <div class="textarea-wrapper">
+                        {{ field }}
+                        <div class="char-count" id="char-count-{{ field.name }}"></div>
+                    </div>
+                    {% else %}
+                    {{ field }}
+                    {% endif %}
+                    
+                    {% if field.help_text %}
+                    <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                    <div class="field-errors">
+                        {% for error in field.errors %}
+                        <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="submit-btn save-btn">
+                    <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16">
+                        <path fill="currentColor" d="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z"/>
+                    </svg>
+                    <span>Сохранить изменения</span>
+                </button>
+                
+                <a href="{% url 'item' item.slug %}" class="cancel-btn">
+                    <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16">
+                        <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                    </svg>
+                    <span>Отмена</span>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<script>
+// Подсчет символов для textarea
+document.addEventListener('DOMContentLoaded', function() {
+    const textareas = document.querySelectorAll('textarea');
+    
+    textareas.forEach(textarea => {
+        const charCount = document.getElementById(`char-count-${textarea.name}`);
+        if (charCount) {
+            // Инициализация
+            charCount.textContent = `${textarea.value.length} символов`;
+            
+            // Обновление при вводе
+            textarea.addEventListener('input', function() {
+                charCount.textContent = `${this.value.length} символов`;
+            });
+        }
+    });
+    
+    // Стилизация выбранного файла
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                this.classList.add('file-selected');
+            } else {
+                this.classList.remove('file-selected');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

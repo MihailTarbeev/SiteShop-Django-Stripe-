@@ -1,0 +1,66 @@
+        <ul>
+            {% if title == "Главная страница" %}
+            <li><a class="selected">Главная</a></li>
+            {% else %}
+            <li><a href="{% url "home" %}">Главная</a></li>
+            {% endif %}
+
+            {% comment %} {% if title == "Товары" %}
+            <li><a class="selected">Товары</a></li>
+            {% else %}
+            <li><a href="">Товары</a></li>
+            {% endif %} {% endcomment %}
+                {% comment %} <ul>
+                    <li><a href="#">Sub menu 1</a></li>
+                    <li><a href="#">Sub menu 2</a></li>
+                    <li><a href="#">Sub menu 3</a></li>
+              </ul> {% endcomment %}
+            </li>
+            {% comment %} <li><a href="about.html">About</a>
+                <ul>
+                    <li><a href="#">Sub menu 1</a></li>
+                    <li><a href="#">Sub menu 2</a></li>
+                    <li><a href="#">Sub menu 3</a></li>
+                    <li><a href="#">Sub menu 4</a></li>
+                    <li><a href="#">Sub menu 5</a></li>
+              </ul>
+            </li>
+            <li><a href="faqs.html">FAQs</a></li>
+            <li><a href="checkout.html">Checkout</a></li>
+            <li><a href="contact.html">Contact</a></li> {% endcomment %}
+            {% if user.is_authenticated %}
+
+                {% if title == "Добавить товар" %}
+                <li><a class="selected">Добавить товар</a></li>
+                {% else %}
+                <li><a href="{% url "add_item" %}">Добавить товар</a></li>
+                {% endif %}
+
+
+                {% comment %} {% if title == "Профиль пользователя" %}
+                <li><a class="selected">Профиль | {{ user.first_name }}</a></li>
+                {% else %}
+                <li><a href="{% url "users:profile" %}">Профиль | {{ user.first_name }}</a></li>
+                {% endif %}
+                <li><a href="{% url "users:logout" %}">Выйти</a></li> {% endcomment %}
+
+            {% else %}
+
+            {% comment %} {% if title == "Авторизация" %}
+            <li><a class="selected">Войти</a></li>
+            {% else %}
+            <li><a href="{% url "users:login" %}">Войти</a></li>
+            {% endif %} {% endcomment %}
+
+            {% comment %} {% if title == "Регистрация" %}
+            <li><a class="selected">Регистрация</a></li>
+            {% else %}
+            <li><a href="{% url "users:register" %}">Регистрация</a></li>
+            {% endif %} {% endcomment %}
+
+            {% endif %}
+
+
+
+        </ul>
+        <br style="clear: left" />

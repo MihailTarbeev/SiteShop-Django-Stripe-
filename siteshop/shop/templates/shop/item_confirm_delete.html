@@ -1,0 +1,54 @@
+{% extends "shop/item.html" %}
+
+{% block confirm_delete %}
+<div class="delete-confirmation-overlay">
+    <div class="delete-confirmation-modal">
+        <div class="modal-header">
+            <svg class="warning-icon" viewBox="0 0 24 24" width="48" height="48">
+                <path fill="#e74c3c" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+            </svg>
+            <h2 class="modal-title">Подтверждение удаления</h2>
+        </div>
+        
+        <div class="modal-content">
+            <p class="warning-text">Вы уверены, что хотите удалить товар <strong>"{{ item.name }}"</strong>?</p>
+            <p class="warning-note">Это действие нельзя отменить. Все данные о товаре будут удалены безвозвратно.</p>
+            
+            <div class="item-preview">
+                <div class="preview-image">
+                    {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                    {% else %}
+                    <img src="{{ default_image }}" alt="Нет изображения">
+                    {% endif %}
+                </div>
+                <div class="preview-details">
+                    <div class="preview-name">{{ item.name }}</div>
+                    <div class="preview-price">{{ item.price }} ₽</div>
+                    <div class="preview-seller">Продавец: {{ item.owner.first_name }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <form method="POST" action="{% url 'delete_item' item.slug %}" class="delete-form">
+                {% csrf_token %}
+                <button type="submit" class="confirm-delete-btn">
+                    <svg class="btn-icon" viewBox="0 0 24 24" width="18" height="18">
+                        <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                    </svg>
+                    <span>Да, удалить товар</span>
+                </button>
+            </form>
+            
+            <a href="{% url 'item' item.slug %}" class="cancel-delete-btn">
+                <svg class="btn-icon" viewBox="0 0 24 24" width="18" height="18">
+                    <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                </svg>
+                <span>Отмена</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

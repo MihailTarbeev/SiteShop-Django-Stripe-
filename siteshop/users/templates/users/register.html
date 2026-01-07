@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block "content" %}
+<div id="register-page">
+    <div class="register-form">
+        <h1 class="register-title">Регистрация</h1>
+        
+        <form method="post" class="register-form-inner">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            
+            <div class="form-error">{{ form.non_field_errors }}</div>
+            
+            <div class="form-grid">
+                {% for f in form %}
+                <div class="form-group">
+                    <label for="{{ f.id_for_label }}" class="form-label">{{ f.label }}</label>
+                    {% if f.name == 'password1' or f.name == 'password2' %}
+                    <div class="password-wrapper">
+                        {{ f }}
+                        <button type="button" class="toggle-password" onclick="togglePassword(this)">
+                            👁️
+                        </button>
+                    </div>
+                    {% else %}
+                    {{ f }}
+                    {% endif %}
+                    {% if f.help_text %}
+                    <small class="help-text">{{ f.help_text }}</small>
+                    {% endif %}
+                    <div class="form-error">{{ f.errors }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <span>Создать аккаунт</span>
+                <svg class="btn-icon" viewBox="0 0 24 24" width="14" height="14">
+                    <path fill="currentColor" d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"/>
+                </svg>
+            </button>
+            
+            <div class="login-link">
+                Уже есть аккаунт? <a href="{% url 'users:login' %}">Войти</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function togglePassword(button) {
+    const wrapper = button.closest('.password-wrapper');
+    const input = wrapper.querySelector('input');
+    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+    input.setAttribute('type', type);
+    button.textContent = type === 'password' ? '👁️' : '🙈';
+}
+</script>
+{% endblock %}

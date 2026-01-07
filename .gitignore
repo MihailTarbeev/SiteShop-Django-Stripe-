@@ -1,0 +1,16 @@
+*.sqlite3
+*.db
+
+__pycache__/
+*.pyc
+
+venv/
+.venv/
+
+.vscode/
+.idea/
+
+
+siteshop/media/*
+!siteshop/media/users/default.jpg
+!siteshop/media/shop/default.jpg
