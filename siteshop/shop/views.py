@@ -1,3 +1,4 @@
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
@@ -6,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 # from users.mixins import MyPermissionMixin
 from siteshop import settings
 from .models import Item
+from .mixins import UserOwnerMixin
 
 
 class PeopleHome(ListView):
@@ -14,7 +16,6 @@ class PeopleHome(ListView):
     context_object_name = "items"
     extra_context = {"title": "Главная страница", "category_selected": 0,
                      "default_image": settings.DEFAULT_ITEM_IMAGE}
-    # permissions_required = "Items.read_all_permission"
 
     def get_queryset(self):
         return Item.published.all().select_related("category")
@@ -24,7 +25,6 @@ class ShopCategory(ListView):
     template_name = 'shop/index.html'
     context_object_name = "items"
     allow_empty = False
-    # permissions_required = "Items.read_all_permission"
 
     def get_queryset(self):
         return Item.published.filter(category__slug=self.kwargs["cat_slug"]).select_related("category")
@@ -43,8 +43,6 @@ class ShowItem(DetailView):
     template_name = 'shop/item.html'
     slug_url_kwarg = "item_slug"
     context_object_name = "item"
-    # permission_required = "Items.read_permission"
-    # check_ownership = True
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -56,10 +54,7 @@ class ShowItem(DetailView):
         return get_object_or_404(Item, slug=self.kwargs[self.slug_url_kwarg], is_available=True)
 
 
-class UpdateItem(UpdateView):
-    # permission_required = "Items.update_permission"
-    # check_ownership = True
-
+class UpdateItem(LoginRequiredMixin, UserOwnerMixin, UpdateView):
     model = Item
     fields = ["image", "name", "price", "description",
               "is_available", "category", "slug"]
@@ -69,13 +64,12 @@ class UpdateItem(UpdateView):
     context_object_name = "item"
 
 
-class AddItem(CreateView):
+class AddItem(LoginRequiredMixin, CreateView):
     model = Item
     fields = ["image", "name", "price", "description",
               "is_available", "category", "slug"]
     template_name = 'shop/addpage.html'
     extra_context = {"title": 'Добавить товар'}
-    # permission_required = "Items.create_permission"
 
     def form_valid(self, form):
         w = form.save(commit=False)
@@ -83,9 +77,7 @@ class AddItem(CreateView):
         return super().form_valid(form)
 
 
-class DeletePage(DeleteView):
-    # permission_required = "Items.delete_permission"
-    # check_ownership = True
+class DeletePage(LoginRequiredMixin, UserOwnerMixin, DeleteView):
     model = Item
     context_object_name = "item"
     success_url = reverse_lazy("home")
