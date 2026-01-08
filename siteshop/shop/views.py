@@ -8,32 +8,12 @@ from .mixins import UserOwnerMixin
 import stripe
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
+from datetime import datetime, timezone
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import stripe
 from django.conf import settings
-
-
-@api_view(['GET'])
-def stripe_tax_rates(request):
-    """
-    GET-параметры:
-    limit = 50 (по умолчанию)
-    starting_after - id rate, с которого начинать
-    ending_before - id rate, по который заканчивать
-    Сортировка по увеличению времени создания
-    """
-    try:
-        tax_rates = stripe.TaxRate.list(**{
-            'limit': int(request.GET.get('limit', 50)),
-            'starting_after': request.GET.get('starting_after'),
-            'ending_before': request.GET.get('ending_before')
-        })
-        return Response({'data': tax_rates.data, "count": len(tax_rates)})
-    except stripe.error.StripeError as e:
-        return Response({'error': str(e)}, status=400)
 
 
 class PeopleHome(ListView):
@@ -112,6 +92,7 @@ class DeletePage(LoginRequiredMixin, UserOwnerMixin, DeleteView):
 
 
 def create_session(request):
+
     session = stripe.checkout.Session.create(
         line_items=[{
             'price_data': {
@@ -148,3 +129,30 @@ def create_session(request):
 
 def create_session_success(request):
     return render(request, "shop/success.html")
+
+
+@api_view(['GET'])
+def stripe_tax_rates(request):
+    """
+    GET-параметры:
+    limit = 50 (по умолчанию)
+    starting_after - id rate, с которого начинать
+    ending_before - id rate, по который заканчивать
+    Сортировка по увеличению времени создания
+    """
+    limit = int(request.GET.get('limit', 50))
+    starting_after = request.GET.get('starting_after')
+    ending_before = request.GET.get('ending_before')
+    try:
+        tax_rates = stripe.TaxRate.list(
+            limit=limit, starting_after=starting_after, ending_before=ending_before)
+
+        for tax_rate in tax_rates:
+            dt_object = datetime.fromtimestamp(
+                tax_rate["created"], tz=timezone.utc)
+            tax_rate["created_UTC"] = dt_object.strftime(
+                '%Y-%m-%d %H:%M:%S UTC')
+
+        return Response({'data': tax_rates.data, "count": len(tax_rates)})
+    except stripe.error.StripeError as e:
+        return Response({'error': str(e)}, status=400)
