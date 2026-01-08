@@ -1,11 +1,11 @@
 /* Минимальная версия */
 .auth-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 80vh;
-    padding: 20px;
+    display: flex; /* Выравнивание по верху */
+    justify-content: center; /* Горизонтальное центрирование */
+    min-height: 100vh; /* Или нужная вам высота */
+    padding: 20px 0; /* Отступы сверху и снизу */
 }
+
 
 .auth-card {
     width: 100%;
@@ -113,3 +113,4 @@
 .link:hover {
     text-decoration: underline;
 }
+

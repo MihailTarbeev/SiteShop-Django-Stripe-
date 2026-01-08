@@ -9,7 +9,7 @@ venv/
 
 .vscode/
 .idea/
-
+.env
 
 siteshop/media/*
 !siteshop/media/users/default.jpg

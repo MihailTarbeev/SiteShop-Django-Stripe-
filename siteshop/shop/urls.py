@@ -11,4 +11,9 @@ urlpatterns = [
     path('add_item/', views.AddItem.as_view(), name='add_item'),
     path('delete_item/<slug:slug>/',
          views.DeletePage.as_view(), name='delete_item'),
+    path('create-checkout-session/',
+         views.create_session, name='create_session'),
+    path('create_session_success/',
+         views.create_session_success, name='create_session_success'),
+    path('api/v1/tax-rates/', views.stripe_tax_rates, name='tax-rates'),
 ]

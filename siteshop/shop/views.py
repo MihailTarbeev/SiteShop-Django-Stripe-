@@ -1,13 +1,39 @@
-from django.http import HttpResponseForbidden
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
-# from users.models import AccessRoleRule, BusinessElement
-# from users.mixins import MyPermissionMixin
 from siteshop import settings
 from .models import Item
 from .mixins import UserOwnerMixin
+import stripe
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+import stripe
+from django.conf import settings
+
+
+@api_view(['GET'])
+def stripe_tax_rates(request):
+    """
+    GET-параметры:
+    limit = 50 (по умолчанию)
+    starting_after - id rate, с которого начинать
+    ending_before - id rate, по который заканчивать
+    Сортировка по увеличению времени создания
+    """
+    try:
+        tax_rates = stripe.TaxRate.list(**{
+            'limit': int(request.GET.get('limit', 50)),
+            'starting_after': request.GET.get('starting_after'),
+            'ending_before': request.GET.get('ending_before')
+        })
+        return Response({'data': tax_rates.data, "count": len(tax_rates)})
+    except stripe.error.StripeError as e:
+        return Response({'error': str(e)}, status=400)
 
 
 class PeopleHome(ListView):
@@ -83,3 +109,42 @@ class DeletePage(LoginRequiredMixin, UserOwnerMixin, DeleteView):
     success_url = reverse_lazy("home")
     extra_context = {"title": "Удаление товара",
                      'default_image': settings.DEFAULT_ITEM_IMAGE}
+
+
+def create_session(request):
+    session = stripe.checkout.Session.create(
+        line_items=[{
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {
+                    'name': 'T-shirt',
+                },
+                'unit_amount': 2000,
+            },
+            'quantity': 1,
+            'tax_rates': ["txr_1SnCZvKpfYmXuwND0q23shWZ",]
+        },
+            {
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {
+                    'name': 'T-shirt',
+                },
+                'unit_amount': 2000,
+            },
+            'quantity': 1,
+            'tax_rates': ["txr_1SnCZvKpfYmXuwND0q23shWZ",]
+        },],
+        # discounts=[{"coupon": "ded-moroz"}],
+        tax_id_collection={'enabled': True},
+        # tax_rates={"type": "eu_vat"},
+        mode='payment',
+        # allow_promotion_codes=True,
+        success_url='http://127.0.0.1:8000/create_session_success',
+    )
+
+    return redirect(session.url, code=303)
+
+
+def create_session_success(request):
+    return render(request, "shop/success.html")
