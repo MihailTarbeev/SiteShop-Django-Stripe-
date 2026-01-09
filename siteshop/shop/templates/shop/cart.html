@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block "content" %}
+<div class="cart-page">
+    <h1 class="cart-title">Корзина</h1>
+    
+    {% if cart_items %}
+    <div class="cart-items">
+        {% for cart_item in cart_items %}
+        <div class="cart-item-card">
+            <div class="cart-item-image">
+                {% if cart_item.item.image %}
+                <img src="{{ cart_item.item.image.url }}" alt="{{ cart_item.item.name }}">
+                {% else %}
+                <img src="{{ default_image }}" alt="Нет изображения">
+                {% endif %}
+            </div>
+            
+            <div class="cart-item-info">
+                <h3 class="cart-item-title">{{ cart_item.item.name }}</h3>
+                <p class="cart-item-price">{{ cart_item.item.price }} {{ cart_item.item.get_currency_display }}</p>
+                
+                <div class="cart-item-quantity">
+                    <form action="{% url 'update_cart_item' cart_item.item.slug %}" method="POST" class="update-quantity-form">
+                        {% csrf_token %}
+                        <button type="button" class="qty-btn minus">-</button>
+                        <input type="number" name="quantity" value="{{ cart_item.quantity }}" min="1" max="99" class="qty-input">
+                        <button type="button" class="qty-btn plus">+</button>
+                        <button type="submit" class="update-btn">Обновить</button>
+                    </form>
+                    
+                    <form action="{% url 'remove_from_cart' cart_item.item.slug %}" method="POST" class="remove-form">
+                        {% csrf_token %}
+                        <button type="submit" class="remove-btn">Удалить</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="cart-item-total">
+                <span class="total-label">Сумма:</span>
+                <span class="total-price">{{ cart_item.total_price }} {{ cart_item.item.get_currency_display }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="cart-summary">
+        <div class="summary-item">
+            <span class="summary-label">Всего товаров:</span>
+            <span class="summary-value">{{ cart_items|length }} шт.</span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Общая сумма:</span>
+            <span class="summary-value total-amount">{{ total_price }} руб.</span>
+        </div>
+        
+        <div class="cart-actions">
+            <form action="{% url 'clear_cart' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="clear-cart-btn">Очистить корзину</button>
+            </form>
+            
+            <a href="{% url 'home' %}" class="continue-shopping">Продолжить покупки</a>
+            <button class="checkout-btn" id="checkout-btn">Оформить заказ</button>
+        </div>
+    </div>
+    
+    {% else %}
+    <div class="empty-cart">
+        <svg width="64" height="64" viewBox="0 0 24 24">
+            <path fill="#ccc" d="M17,18A2,2 0 0,1 19,20A2,2 0 0,1 17,22C15.89,22 15,21.1 15,20C15,18.89 15.89,18 17,18M1,2H4.27L5.21,4H20A1,1 0 0,1 21,5C21,5.17 20.95,5.34 20.88,5.5L17.3,11.97C16.96,12.58 16.3,13 15.55,13H8.1L7.2,14.63L7.17,14.75A0.25,0.25 0 0,0 7.42,15H19V17H7C5.89,17 5,16.1 5,15C5,14.65 5.09,14.32 5.24,14.04L6.6,11.59L3,4H1V2M7,18A2,2 0 0,1 9,20A2,2 0 0,1 7,22C5.89,22 5,21.1 5,20C5,18.89 5.89,18 7,18M16,11L18.78,6H6.14L8.5,11H16Z"/>
+        </svg>
+        <h2>Корзина пуста</h2>
+        <p>Добавьте товары, чтобы продолжить</p>
+        <a href="{% url 'home' %}" class="start-shopping-btn">Начать покупки</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.cart-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.cart-title {
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.cart-item-card {
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+    align-items: center;
+}
+
+.cart-item-image img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.cart-item-info {
+    flex: 1;
+}
+
+.cart-item-title {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.cart-item-price {
+    margin: 0;
+    color: #28a745;
+    font-weight: bold;
+}
+
+.cart-item-quantity {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.update-quantity-form {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.qty-btn {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.qty-input {
+    width: 40px;
+    height: 30px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.update-btn {
+    padding: 5px 10px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.remove-btn {
+    padding: 5px 10px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.cart-item-total {
+    text-align: right;
+    min-width: 120px;
+}
+
+.total-label {
+    display: block;
+    color: #666;
+    font-size: 14px;
+}
+
+.total-price {
+    display: block;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.cart-summary {
+    margin-top: 30px;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.total-amount {
+    font-size: 24px;
+    color: #28a745;
+}
+
+.cart-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.clear-cart-btn {
+    padding: 10px 15px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.continue-shopping {
+    padding: 10px 15px;
+    background: #17a2b8;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.checkout-btn {
+    padding: 10px 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    flex: 1;
+}
+
+.empty-cart {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.empty-cart h2 {
+    color: #666;
+    margin: 20px 0 10px 0;
+}
+
+.start-shopping-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработчики количества в корзине
+    document.querySelectorAll('.qty-btn.minus').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.closest('.update-quantity-form').querySelector('.qty-input');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        });
+    });
+    
+    document.querySelectorAll('.qty-btn.plus').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.closest('.update-quantity-form').querySelector('.qty-input');
+            if (parseInt(input.value) < 99) {
+                input.value = parseInt(input.value) + 1;
+            }
+        });
+    });
+    
+    // Кнопка оформления заказа
+    const checkoutBtn = document.getElementById('checkout-btn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', function() {
+            alert('Функция оформления заказа будет реализована позже!');
+            // Здесь будет редирект на оформление заказа
+        });
+    }
+});
+</script>
+{% endblock %}

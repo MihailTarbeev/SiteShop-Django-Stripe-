@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Item, Category, Tax, Discount
+from .models import Item, Category, Tax, Discount, Cart, CartItem
 from django.utils.safestring import mark_safe
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -10,7 +10,7 @@ class ItemAdmin(admin.ModelAdmin):
     fields = ('name', "item_image", "image", "slug", 'price', "currency", 'owner',
               'is_available', 'category', "taxes")
     list_display = ("name", "item_image", 'owner',
-                    "is_available", "category", "created_at", "currency",)
+                    "is_available", "category", "created_at", "price", "currency",)
     readonly_fields = ["item_image",]
     list_editable = ("is_available",)
     ordering = ('created_at',)
@@ -139,3 +139,15 @@ class DiscountAdmin(admin.ModelAdmin):
         return None
 
     delete_selected.short_description = "Удалить выбранные купоны"
+
+
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    list_display = ('user', 'created_at')
+    ordering = ('id',)
+
+
+@admin.register(CartItem)
+class CartItemAdmin(admin.ModelAdmin):
+    list_display = ('cart', 'item', "quantity")
+    ordering = ('id',)

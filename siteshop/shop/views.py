@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from siteshop import settings
-from .models import Item
+from .models import CartItem, Item, Cart
 from .mixins import UserOwnerMixin
 import stripe
 from rest_framework.decorators import api_view
@@ -13,7 +13,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import stripe
 from django.conf import settings
-from .forms import ItemForm
+from .forms import ItemForm, AddToCartForm
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 
 class PeopleHome(ListView):
@@ -54,6 +56,19 @@ class ShowItem(DetailView):
         context = super().get_context_data(**kwargs)
         context['title'] = context["item"].name
         context['default_image'] = settings.DEFAULT_ITEM_IMAGE
+        context['item_in_cart'] = False
+        context['cart_quantity'] = 0
+
+        if self.request.user.is_authenticated:
+            cart_item = CartItem.objects.filter(
+                cart__user=self.request.user,
+                item=context['item']
+            ).first()
+
+            if cart_item:
+                context['item_in_cart'] = True
+                context['cart_quantity'] = cart_item.quantity
+
         return context
 
     def get_object(self, queryset=None):
@@ -168,3 +183,48 @@ def stripe_coupons(request):
         return Response({'data': tax_rates.data, "count": len(tax_rates)})
     except stripe.error.StripeError as e:
         return Response({'error': str(e)}, status=400)
+
+
+def view_cart(request):
+    pass
+
+
+def clear_cart(request):
+    pass
+
+
+@login_required
+def add_to_cart(request, item_slug):
+
+    item = get_object_or_404(Item, slug=item_slug, is_available=True)
+
+    cart, created = Cart.objects.get_or_create(user=request.user)
+
+    form = AddToCartForm(request.POST)
+    if form.is_valid():
+        quantity = form.cleaned_data['quantity']
+
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            item=item,
+            defaults={'quantity': quantity}
+        )
+
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+
+        messages.success(
+            request,
+            f'Товар "{item.name}" добавлен в корзину!'
+        )
+
+    return redirect('item', item_slug=item_slug)
+
+
+def remove_from_cart(request):
+    pass
+
+
+def update_cart_item(request):
+    pass

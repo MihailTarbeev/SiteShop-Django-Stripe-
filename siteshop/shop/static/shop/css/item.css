@@ -354,3 +354,337 @@
 .buy-btn:hover .buy-icon {
     transform: scale(1.1);
 }
+
+/* Стили для корзины */
+.buy-cart-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.add-to-cart-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.quantity-btn {
+    background: #f5f5f5;
+    border: none;
+    width: 30px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+}
+
+.quantity-btn:hover {
+    background: #e0e0e0;
+}
+
+.quantity-input {
+    width: 40px;
+    height: 36px;
+    border: none;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    text-align: center;
+    font-size: 14px;
+    -moz-appearance: textfield;
+}
+
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.add-to-cart-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.add-to-cart-btn:hover {
+    background: #218838;
+}
+
+.buy-now-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.buy-now-btn:hover {
+    background: #0056b3;
+}
+
+.in-cart-message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background: #e9ecef;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.go-to-cart-btn {
+    padding: 5px 10px;
+    background: #6c757d;
+    color: white;
+    border-radius: 3px;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.3s;
+}
+
+.go-to-cart-btn:hover {
+    background: #5a6268;
+    color: white;
+}
+
+.cart-icon, .buy-icon {
+    fill: currentColor;
+}
+
+/* Для маленьких экранов */
+@media (max-width: 768px) {
+    .buy-cart-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .add-to-cart-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .quantity-selector {
+        justify-content: center;
+    }
+}
+
+/* Стили для детальной страницы товара */
+
+/* Кнопки добавления в корзину */
+.add-to-cart-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.quantity-btn {
+    background: #f5f5f5;
+    border: none;
+    width: 30px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+.quantity-btn:hover {
+    background: #e0e0e0;
+}
+
+.quantity-btn:active {
+    background: #d0d0d0;
+}
+
+.quantity-input {
+    width: 40px;
+    height: 36px;
+    border: none;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    text-align: center;
+    font-size: 14px;
+    -moz-appearance: textfield;
+    font-family: inherit;
+}
+
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.quantity-input:focus {
+    outline: none;
+    background-color: #f9f9f9;
+}
+
+.add-to-cart-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s;
+    font-family: inherit;
+}
+
+.add-to-cart-btn:hover {
+    background: #218838;
+}
+
+.add-to-cart-btn:active {
+    background: #1e7e34;
+    transform: translateY(1px);
+}
+
+/* Сообщение "В корзине" */
+.in-cart-message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background: #e9ecef;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.cart-icon {
+    fill: currentColor;
+}
+
+.go-to-cart-btn {
+    padding: 5px 10px;
+    background: #6c757d;
+    color: white;
+    border-radius: 3px;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.3s;
+}
+
+.go-to-cart-btn:hover {
+    background: #5a6268;
+    color: white;
+}
+
+/* Кнопка "Купить сейчас" */
+.buy-form {
+    display: inline-block;
+}
+
+.buy-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s;
+    font-family: inherit;
+}
+
+.buy-btn:hover {
+    background: #0056b3;
+}
+
+.buy-btn:active {
+    background: #004085;
+    transform: translateY(1px);
+}
+
+.buy-icon {
+    fill: currentColor;
+}
+
+/* Респонсив */
+@media (max-width: 768px) {
+    .add-to-cart-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .quantity-selector {
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+}
+
+/* Сообщение об успешном добавлении в корзину */
+.cart-success-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #28a745;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s, transform 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.cart-success-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.success-icon {
+    fill: currentColor;
+}

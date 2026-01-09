@@ -123,7 +123,7 @@ class Item(models.Model):
     slug = models.SlugField(max_length=100, unique=True, verbose_name="URL",)
 
     currency = models.CharField(
-        max_length=3, choices=CURRENCY_CHOICES, verbose_name="Валюта",)
+        max_length=3, choices=CURRENCY_CHOICES, default=CURRENCY_CHOICES[0][0], verbose_name="Валюта",)
 
     taxes = models.ManyToManyField(
         Tax,
@@ -268,3 +268,36 @@ class Discount(models.Model):
         verbose_name = "Купон"
         verbose_name_plural = "Купоны"
         ordering = ['-created_at']
+
+
+class Cart(models.Model):
+    """Модель корзины"""
+    user = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        related_name='cart'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Корзина"
+        verbose_name_plural = "Корзины"
+
+    def __str__(self):
+        return f"Корзина {self.user.username}"
+
+
+class CartItem(models.Model):
+    """Модель для связи моделей Items и Cart"""
+    cart = models.ForeignKey(
+        Cart, on_delete=models.CASCADE, related_name='items')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        unique_together = ['cart', 'item']
+        verbose_name = "Товары в корзине"
+        verbose_name_plural = "Товары в корзине"
+
+    def __str__(self):
+        return f"{self.cart.user.username} {self.item.name}"

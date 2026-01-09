@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block javascript %}
+<script type="text/javascript" src="{% static 'shop/js/item.js' %}"></script>
+{% endblock %}
+
 {% block "content" %}
+
+
 <div id="item-detail-page">
     <div class="item-detail-card">
         {% block confirm_delete %}{% endblock %}
@@ -30,27 +36,50 @@
                 </div>
                 
                 <div class="item-actions">
+
+                    {% if user == item.owner %}
                     <a href="{% url "edit_item" item.slug %}" class="edit-btn">
                         <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16">
                             <path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
                         </svg>
                         <span>Редактировать</span>
                     </a>
-                <a href="{% url "delete_item" item.slug %}" class="delete-btn">
-                    <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16">
-                        <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
-                    </svg>
-                    <span>Удалить товар</span>
-                </a>
-            <form action="{% url "create_session" item.slug %}" method="POST" class="buy-form">
-                {% csrf_token %}
-                <button type="submit" class="buy-btn">
-                    <svg class="buy-icon" viewBox="0 0 24 24" width="20" height="20">
-                        <path fill="currentColor" d="M17,18A2,2 0 0,1 19,20A2,2 0 0,1 17,22C15.89,22 15,21.1 15,20C15,18.89 15.89,18 17,18M1,2H4.27L5.21,4H20A1,1 0 0,1 21,5C21,5.17 20.95,5.34 20.88,5.5L17.3,11.97C16.96,12.58 16.3,13 15.55,13H8.1L7.2,14.63L7.17,14.75A0.25,0.25 0 0,0 7.42,15H19V17H7C5.89,17 5,16.1 5,15C5,14.65 5.09,14.32 5.24,14.04L6.6,11.59L3,4H1V2M7,18A2,2 0 0,1 9,20A2,2 0 0,1 7,22C5.89,22 5,21.1 5,20C5,18.89 5.89,18 7,18M16,11L18.78,6H6.14L8.5,11H16Z"/>
-                    </svg>
-                    <span>Купить сейчас</span>
-                </button>
-            </form>
+                    <a href="{% url "delete_item" item.slug %}" class="delete-btn">
+                        <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                        </svg>
+                        <span>Удалить товар</span>
+                    </a>
+                    {% endif %}
+                    
+                    {% if item_in_cart %}
+                    <p>В корзине: {{ cart_quantity }} шт.</p>
+                    {% endif %}
+                    <form action="{% url 'add_to_cart' item.slug %}" method="POST" class="add-to-cart-form">
+                        {% csrf_token %}
+                        <div class="quantity-selector">
+                            <button type="button" class="quantity-btn minus">-</button>
+                            <input type="number" name="quantity" value="1" min="1" max="99" class="quantity-input" id="id_quantity">
+                            <button type="button" class="quantity-btn plus">+</button>
+                        </div>
+                        <button type="submit" class="add-to-cart-btn">
+                            <svg class="cart-icon" viewBox="0 0 24 24" width="18" height="18">
+                                <path fill="currentColor" d="M17,18A2,2 0 0,1 19,20A2,2 0 0,1 17,22C15.89,22 15,21.1 15,20C15,18.89 15.89,18 17,18M1,2H4.27L5.21,4H20A1,1 0 0,1 21,5C21,5.17 20.95,5.34 20.88,5.5L17.3,11.97C16.96,12.58 16.3,13 15.55,13H8.1L7.2,14.63L7.17,14.75A0.25,0.25 0 0,0 7.42,15H19V17H7C5.89,17 5,16.1 5,15C5,14.65 5.09,14.32 5.24,14.04L6.6,11.59L3,4H1V2M7,18A2,2 0 0,1 9,20A2,2 0 0,1 7,22C5.89,22 5,21.1 5,20C5,18.89 5.89,18 7,18M16,11L18.78,6H6.14L8.5,11H16Z"/>
+                            </svg>
+                            <span>В корзину</span>
+                        </button>
+                    </form>
+
+                    
+                    <form action="{% url "create_session" item.slug %}" method="POST" class="buy-form">
+                        {% csrf_token %}
+                        <button type="submit" class="buy-btn">
+                            <svg class="buy-icon" viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M17,18A2,2 0 0,1 19,20A2,2 0 0,1 17,22C15.89,22 15,21.1 15,20C15,18.89 15.89,18 17,18M1,2H4.27L5.21,4H20A1,1 0 0,1 21,5C21,5.17 20.95,5.34 20.88,5.5L17.3,11.97C16.96,12.58 16.3,13 15.55,13H8.1L7.2,14.63L7.17,14.75A0.25,0.25 0 0,0 7.42,15H19V17H7C5.89,17 5,16.1 5,15C5,14.65 5.09,14.32 5.24,14.04L6.6,11.59L3,4H1V2M7,18A2,2 0 0,1 9,20A2,2 0 0,1 7,22C5.89,22 5,21.1 5,20C5,18.89 5.89,18 7,18M16,11L18.78,6H6.14L8.5,11H16Z"/>
+                            </svg>
+                            <span>Купить сейчас</span>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -73,20 +102,8 @@
                 <span class="detail-value">{{ item.category }}</span>
             </div>
             {% endif %}
-            
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-
-    const elements = document.querySelectorAll('.item-detail-card > *');
-    elements.forEach((el, index) => {
-        el.style.animationDelay = `${index * 0.1}s`;
-        el.style.animation = 'fadeIn 0.5s ease forwards';
-        el.style.opacity = '0';
-    });
-});
-</script>
+</body>
 {% endblock %}
