@@ -156,3 +156,30 @@ def stripe_tax_rates(request):
         return Response({'data': tax_rates.data, "count": len(tax_rates)})
     except stripe.error.StripeError as e:
         return Response({'error': str(e)}, status=400)
+
+
+@api_view(['GET'])
+def stripe_coupons(request):
+    """
+    GET-параметры:
+    limit = 50 (по умолчанию)
+    starting_after - id rate, с которого начинать
+    ending_before - id rate, по который заканчивать
+    Сортировка по увеличению времени создания
+    """
+    limit = int(request.GET.get('limit', 50))
+    starting_after = request.GET.get('starting_after')
+    ending_before = request.GET.get('ending_before')
+    try:
+        tax_rates = stripe.Coupon.list(
+            limit=limit, starting_after=starting_after, ending_before=ending_before)
+
+        for tax_rate in tax_rates:
+            dt_object = datetime.fromtimestamp(
+                tax_rate["created"], tz=timezone.utc)
+            tax_rate["created_UTC"] = dt_object.strftime(
+                '%Y-%m-%d %H:%M:%S UTC')
+
+        return Response({'data': tax_rates.data, "count": len(tax_rates)})
+    except stripe.error.StripeError as e:
+        return Response({'error': str(e)}, status=400)

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Item, Category, Tax
+from .models import Item, Category, Tax, Discount
 from django.utils.safestring import mark_safe
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -35,10 +35,18 @@ class TaxAdmin(admin.ModelAdmin):
 
     list_display = ("display_name", "percentage", "stripe_tax_id", "inclusive", "active",
                     "description", "created_at", "updated_at")
-    readonly_fields = ["stripe_tax_id",
-                       "created_at", "updated_at", "inclusive"]
     ordering = ('created_at',)
     actions = ['delete_selected']
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ["stripe_tax_id", "percentage",
+                    "created_at", "updated_at", "inclusive"]
+        else:
+            return ["stripe_tax_id",
+                    "created_at", "updated_at", "inclusive"]
+
+        return super().get_readonly_fields(request, obj)
 
     def save_model(self, request, obj, form, change):
         try:
@@ -79,3 +87,55 @@ class TaxAdmin(admin.ModelAdmin):
         return None
 
     delete_selected.short_description = "Удалить выбранные налоги"
+
+
+@admin.register(Discount)
+class DiscountAdmin(admin.ModelAdmin):
+    fields = ("name", "stripe_coupon_id", "percent_off", "amount_off", "currency", "duration",
+              "duration_in_months", "is_active", "created_at", "updated_at")
+
+    list_display = ("name", "stripe_coupon_id", "percent_off", "currency",
+                    "duration", "duration_in_months", "is_active", "created_at", "updated_at")
+    ordering = ('created_at',)
+    actions = ['delete_selected']
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ("stripe_coupon_id", "percent_off", "amount_off", "currency",
+                    "duration", "duration_in_months", "is_active", "created_at", "updated_at")
+        else:
+            return ("stripe_coupon_id", "created_at", "updated_at")
+
+    def save_model(self, request, obj, form, change):
+        try:
+            obj.save()
+            messages.success(request, f'Купон "{obj.name}" сохранён.')
+        except Exception as e:
+            messages.error(request, str(e))
+
+    def delete_model(self, request, obj):
+        try:
+            obj.delete()
+            messages.success(request, f'Купон "{obj.name}" удален.')
+        except Exception as e:
+            messages.error(request, str(e))
+
+    def delete_selected(self, request, queryset):
+        count_taxs = 0
+        errors = []
+
+        for obj in queryset:
+            try:
+                obj.delete()
+                count_taxs += 1
+            except Exception as e:
+                errors.append(f"{obj.display_name}: {str(e)}")
+
+        if count_taxs:
+            message = f'Успешно удалено {count_taxs} купонов'
+        if errors:
+            message += f'/nОшибки: {", ".join(errors)}'
+            self.message_user(request, message)
+        return None
+
+    delete_selected.short_description = "Удалить выбранные купоны"

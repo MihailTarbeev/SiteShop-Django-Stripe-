@@ -16,4 +16,5 @@ urlpatterns = [
     path('create_session_success/',
          views.create_session_success, name='create_session_success'),
     path('api/v1/tax-rates/', views.stripe_tax_rates, name='tax-rates'),
+    path('api/v1/coupons/', views.stripe_coupons, name='coupons'),
 ]

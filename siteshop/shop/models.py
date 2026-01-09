@@ -110,50 +110,21 @@ class Category(models.Model):
 class Tax(models.Model):
     """Модель налогов"""
     display_name = models.CharField(max_length=50, verbose_name="Название")
-    percentage = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        verbose_name="Процентная ставка", validators=(MinValueValidator(0), MaxValueValidator(100))
-    )
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Процентная ставка", validators=(
+        MinValueValidator(0), MaxValueValidator(100)))
     stripe_tax_id = models.CharField(
-        max_length=100,
-        blank=True,
-        verbose_name="ID в Stripe",
-        editable=False
-    )
+        max_length=100, blank=True, verbose_name="ID в Stripe", editable=False)
     inclusive = models.BooleanField(
-        default=False,
-        verbose_name="Включение в цену"
-    )
-    active = models.BooleanField(
-        default=True,
-        verbose_name="Активен"
-    )
-    country = models.CharField(
-        max_length=2,
-        null=True,
-        blank=True,
-        verbose_name="Код страны",
-        help_text="ISO 3166-1"
-    )
+        default=False, verbose_name="Включение в цену")
+    active = models.BooleanField(default=True, verbose_name="Активен")
+    country = models.CharField(max_length=2, null=True, blank=True,
+                               verbose_name="Код страны", help_text="ISO 3166-1")
     description = models.TextField(
-        max_length=150,
-        null=True,
-        blank=True,
-        verbose_name="Описание"
-    )
+        max_length=150, null=True, blank=True, verbose_name="Описание")
     jurisdiction = models.CharField(
-        max_length=50,
-        null=True,
-        blank=True,
-        verbose_name="Юрисдикция"
-    )
-    state = models.CharField(
-        max_length=50,
-        null=True,
-        blank=True,
-        verbose_name="Регион (Штат)"
-    )
+        max_length=50, null=True, blank=True, verbose_name="Юрисдикция")
+    state = models.CharField(max_length=50, null=True,
+                             blank=True, verbose_name="Регион (Штат)")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -178,7 +149,7 @@ class Tax(models.Model):
                 self.stripe_tax_id = tax_rate.id
 
             else:
-                stripe.TaxRate.modify(  # можно изменять только active, country, description, display_name, jurisdiction, state
+                stripe.TaxRate.modify(
                     self.stripe_tax_id,
                     display_name=self.display_name,
                     active=self.active,
@@ -211,3 +182,114 @@ class Tax(models.Model):
     class Meta:
         verbose_name = "Налог"
         verbose_name_plural = "Налоги"
+
+
+class Discount(models.Model):
+    """Модель купонов"""
+
+    DURATION_CHOICES = [
+        ('forever', 'Навсегда'),
+        ('once', 'Один раз'),
+        ('repeating', 'Повторяющийся'),
+    ]
+
+    CURRENCY_CHOICES = [
+        ('usd', 'USD - Доллар США'),
+        ('eur', 'EUR - Евро'),
+        ('rub', 'RUB - Рубль'),
+    ]
+
+    name = models.CharField(max_length=40, verbose_name="Название купона", )
+
+    stripe_coupon_id = models.CharField(
+        max_length=100, blank=True, verbose_name="ID купона в Stripe", editable=False)
+
+    amount_off = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Сумма скидки",)
+
+    percent_off = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,
+                                      verbose_name="Процент скидки", validators=[MinValueValidator(0), MaxValueValidator(100)])
+
+    currency = models.CharField(
+        max_length=3, choices=CURRENCY_CHOICES, null=True, blank=True, verbose_name="Валюта",)
+
+    duration = models.CharField(max_length=10, choices=DURATION_CHOICES,
+                                default='forever', verbose_name="Длительность действия")
+
+    duration_in_months = models.PositiveIntegerField(
+        null=True, blank=True, verbose_name="Количество месяцев",)
+
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        if self.amount_off:
+            return f"{self.name} - {self.amount_off} {self.currency}"
+        return f"{self.name} - {self.percent_off}%"
+
+    def clean(self):
+        errors = {}
+
+        if self.amount_off and self.percent_off:
+            errors['amount_off'] = 'Укажите либо сумму, либо процент скидки, но не оба.'
+
+        if self.amount_off and not self.currency:
+            errors['currency'] = 'Валюта обязательна для скидки с фиксированной суммой.'
+
+        if self.duration == 'repeating' and not self.duration_in_months:
+            errors['duration_in_months'] = 'Для повторяющихся купонов укажите количество месяцев.'
+
+        if self.duration != 'repeating' and self.duration_in_months:
+            errors['duration_in_months'] = 'Количество месяцев указывается только для повторяющихся купонов.'
+
+        if self.amount_off and self.amount_off <= 0:
+            errors['amount_off'] = 'Сумма скидки должна быть положительной.'
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+
+        try:
+            if not self.stripe_coupon_id:
+                coupon_params = {
+                    'name': self.name,
+                    'duration': self.duration,
+                }
+
+                if self.amount_off:
+                    coupon_params['amount_off'] = int(self.amount_off * 100)
+                    coupon_params['currency'] = self.currency.lower()
+                else:
+                    coupon_params['percent_off'] = float(self.percent_off)
+
+                if self.duration == 'repeating' and self.duration_in_months:
+                    coupon_params['duration_in_months'] = self.duration_in_months
+
+                coupon = stripe.Coupon.create(**coupon_params)
+                self.stripe_coupon_id = coupon.id
+            else:
+                stripe.Coupon.modify(
+                    self.stripe_coupon_id,
+                    name=self.name
+                )
+            super().save(*args, **kwargs)
+
+        except Exception as e:
+            raise ValidationError(f'Ошибка при сохранении: {str(e)}')
+
+    def delete(self, *args, **kwargs):
+        try:
+            if self.stripe_coupon_id:
+                stripe.Coupon.delete(self.stripe_coupon_id)
+        except Exception as e:
+            raise ValidationError(f'Ошибка при удалении: {e}')
+
+        super().delete(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Купон"
+        verbose_name_plural = "Купоны"
+        ordering = ['-created_at']
