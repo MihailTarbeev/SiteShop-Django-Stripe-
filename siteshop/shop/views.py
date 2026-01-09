@@ -13,6 +13,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import stripe
 from django.conf import settings
+from .forms import ItemForm
 
 
 class PeopleHome(ListView):
@@ -60,9 +61,8 @@ class ShowItem(DetailView):
 
 
 class UpdateItem(LoginRequiredMixin, UserOwnerMixin, UpdateView):
+    form_class = ItemForm
     model = Item
-    fields = ["image", "name", "price", "description",
-              "is_available", "category", "slug"]
     template_name = 'shop/edit_item.html'
     extra_context = {"title": "Редактирование",
                      'default_image': settings.DEFAULT_ITEM_IMAGE}
@@ -70,9 +70,8 @@ class UpdateItem(LoginRequiredMixin, UserOwnerMixin, UpdateView):
 
 
 class AddItem(LoginRequiredMixin, CreateView):
+    form_class = ItemForm
     model = Item
-    fields = ["image", "name", "price", "description",
-              "is_available", "category", "slug"]
     template_name = 'shop/addpage.html'
     extra_context = {"title": 'Добавить товар'}
 
@@ -92,6 +91,8 @@ class DeletePage(LoginRequiredMixin, UserOwnerMixin, DeleteView):
 
 def create_session(request, item_slug):
     item = get_object_or_404(Item, slug=item_slug, is_available=True)
+    taxes = item.taxes.all()
+
     session = stripe.checkout.Session.create(
         line_items=[{
             'price_data': {
@@ -102,7 +103,7 @@ def create_session(request, item_slug):
                 'unit_amount': int(item.price * 100),
             },
             'quantity': 1,
-            'tax_rates': ["txr_1SnCZvKpfYmXuwND0q23shWZ",]
+            'tax_rates': [tax.stripe_tax_id for tax in taxes]
         }],
         mode='payment',
         success_url='http://127.0.0.1:8000/create_session_success',

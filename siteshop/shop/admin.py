@@ -8,9 +8,9 @@ from django.core.exceptions import ValidationError
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
     fields = ('name', "item_image", "image", "slug", 'price', "currency", 'owner',
-              'is_available', 'category')
+              'is_available', 'category', "taxes")
     list_display = ("name", "item_image", 'owner',
-                    "is_available", "category", "created_at", "updated_at", "currency")
+                    "is_available", "category", "created_at", "currency",)
     readonly_fields = ["item_image",]
     list_editable = ("is_available",)
     ordering = ('created_at',)
