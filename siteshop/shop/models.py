@@ -7,6 +7,7 @@ from users.validators import RussianValidator
 import stripe
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
+from .utils import CURRENCY_CHOICES
 
 
 class PublishedManager(models.Manager):
@@ -17,55 +18,35 @@ class PublishedManager(models.Manager):
 class Item(models.Model):
     """Модель товара"""
     name = models.CharField(
-        max_length=200,
-        verbose_name="Название товара", validators=[RussianValidator(),]
-    )
+        max_length=200, verbose_name="Название товара", validators=[RussianValidator(),])
 
-    price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        validators=[MinValueValidator(0)],
-        verbose_name="Цена"
-    )
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[
+                                MinValueValidator(0)], verbose_name="Цена")
 
-    description = models.TextField(
-        blank=True,
-        verbose_name="Описание"
-    )
+    description = models.TextField(blank=True, verbose_name="Описание")
 
-    owner = models.ForeignKey(
-        get_user_model(),
-        on_delete=models.CASCADE,
-        related_name='items',
-        verbose_name="Владелец"
-    )
+    owner = models.ForeignKey(get_user_model(),
+                              on_delete=models.CASCADE, related_name='items', verbose_name="Владелец")
 
     created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Дата создания"
-    )
+        auto_now_add=True, verbose_name="Дата создания")
 
     updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Дата обновления"
-    )
+        auto_now=True, verbose_name="Дата обновления")
 
     is_available = models.BooleanField(
-        default=True,
-        verbose_name="Доступен для продажи"
-    )
+        default=True, verbose_name="Доступен для продажи")
 
     image = models.ImageField(
         upload_to='items/%Y/%m/%d/', blank=True, verbose_name="Изображение")
 
-    category = models.ForeignKey(
-        'Category', on_delete=models.SET_NULL, null=True, related_name="items", verbose_name="Категория")
+    category = models.ForeignKey('Category', on_delete=models.SET_NULL,
+                                 null=True, related_name="items", verbose_name="Категория")
 
-    slug = models.SlugField(
-        max_length=100,
-        unique=True,
-        verbose_name="URL",
-    )
+    slug = models.SlugField(max_length=100, unique=True, verbose_name="URL",)
+
+    currency = models.CharField(
+        max_length=3, choices=CURRENCY_CHOICES, null=True, blank=True, verbose_name="Валюта",)
 
     objects = models.Manager()
     published = PublishedManager()
@@ -84,17 +65,10 @@ class Item(models.Model):
 
 class Category(models.Model):
     """Модель категории товаров"""
-    name = models.CharField(
-        max_length=100,
-        unique=True,
-        verbose_name="Название категории"
-    )
+    name = models.CharField(max_length=100, unique=True,
+                            verbose_name="Название категории")
 
-    slug = models.SlugField(
-        max_length=100,
-        unique=True,
-        verbose_name="URL"
-    )
+    slug = models.SlugField(max_length=100, unique=True, verbose_name="URL")
 
     class Meta:
         verbose_name = "Категория"
@@ -191,12 +165,6 @@ class Discount(models.Model):
         ('forever', 'Навсегда'),
         ('once', 'Один раз'),
         ('repeating', 'Повторяющийся'),
-    ]
-
-    CURRENCY_CHOICES = [
-        ('usd', 'USD - Доллар США'),
-        ('eur', 'EUR - Евро'),
-        ('rub', 'RUB - Рубль'),
     ]
 
     name = models.CharField(max_length=40, verbose_name="Название купона", )

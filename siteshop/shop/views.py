@@ -9,7 +9,6 @@ import stripe
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from datetime import datetime, timezone
-
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import stripe
@@ -91,36 +90,21 @@ class DeletePage(LoginRequiredMixin, UserOwnerMixin, DeleteView):
                      'default_image': settings.DEFAULT_ITEM_IMAGE}
 
 
-def create_session(request):
-
+def create_session(request, item_slug):
+    item = get_object_or_404(Item, slug=item_slug, is_available=True)
     session = stripe.checkout.Session.create(
         line_items=[{
             'price_data': {
-                'currency': 'usd',
+                'currency': item.currency,
                 'product_data': {
-                    'name': 'T-shirt',
+                    'name': item.name,
                 },
-                'unit_amount': 2000,
+                'unit_amount': int(item.price * 100),
             },
             'quantity': 1,
             'tax_rates': ["txr_1SnCZvKpfYmXuwND0q23shWZ",]
-        },
-            {
-            'price_data': {
-                'currency': 'usd',
-                'product_data': {
-                    'name': 'T-shirt',
-                },
-                'unit_amount': 2000,
-            },
-            'quantity': 1,
-            'tax_rates': ["txr_1SnCZvKpfYmXuwND0q23shWZ",]
-        },],
-        # discounts=[{"coupon": "ded-moroz"}],
-        tax_id_collection={'enabled': True},
-        # tax_rates={"type": "eu_vat"},
+        }],
         mode='payment',
-        # allow_promotion_codes=True,
         success_url='http://127.0.0.1:8000/create_session_success',
     )
 
