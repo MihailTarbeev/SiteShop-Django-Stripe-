@@ -37,7 +37,9 @@
     
     <div class="cart-items">
         {% for cart_item in cart_items %}
-        <div class="cart-item-card">
+        <div class="cart-item-card" 
+             data-item-price="{{ cart_item.item.price }}"
+             data-item-currency="{{ cart_item.item.get_currency_display }}">
             <div class="cart-item-image">
                 {% if cart_item.item.image %}
                 <img src="{{ cart_item.item.image.url }}" alt="{{ cart_item.item.name }}">
@@ -56,7 +58,7 @@
                         <button type="button" class="qty-btn minus">-</button>
                         <input type="number" name="quantity" value="{{ cart_item.quantity }}" min="1" max="99" class="qty-input">
                         <button type="button" class="qty-btn plus">+</button>
-                        <button type="submit" class="update-btn">Обновить</button>
+                        <button type="submit" class="update-btn">Подтвердить</button>
                     </form>
                     
                     <form action="{% url 'remove_from_cart' cart_item.item.slug %}" method="POST" class="remove-form">
@@ -68,30 +70,30 @@
             
             <div class="cart-item-total">
                 <span class="total-label">Сумма:</span>
-                <span class="total-price">{{ cart_item.calculate_total_price|floatformat:2 }} {{ cart_item.item.get_currency_display }}</span>
+                <span class="total-price">
+                    {{ cart_item.calculate_total_price|floatformat:2 }} {{ cart_item.item.get_currency_display }}
+                </span>
             </div>
         </div>
         {% endfor %}
     </div>
     
     <div class="cart-summary">
+        <div class="summary-item">
+            <span class="summary-label">Общее количество:</span>
+            <span class="summary-value" id="total-quantity">{{ total_quantity }} шт.</span>
+        </div>
+        
         {% if not has_multiple_currencies %}
         <div class="summary-item">
-            <span class="summary-label">Всего товаров:</span>
-            <span class="summary-value">{{ total_quantity }} шт.</span>
-        </div>
-        <div class="summary-item">
             <span class="summary-label">Общая сумма:</span>
-            <span class="summary-value total-amount">
-                {{ total_price|floatformat:2 }} 
-                {{ cart_items.0.item.get_currency_display }}
+            <span class="summary-value total-amount" id="cart-total"
+                data-original-total="{{ total_price|floatformat:2 }}"
+                data-currency="{{ cart_items.0.item.get_currency_display }}">
+                {{ total_price|floatformat:2 }} {{ cart_items.0.item.get_currency_display }}
             </span>
         </div>
         {% else %}
-        <div class="summary-item">
-            <span class="summary-label">Всего товаров:</span>
-            <span class="summary-value">{{ cart_items|length }} шт.</span>
-        </div>
         <div class="summary-item">
             <span class="summary-label">Общая сумма:</span>
             <span class="summary-value" style="color: #dc3545;">
