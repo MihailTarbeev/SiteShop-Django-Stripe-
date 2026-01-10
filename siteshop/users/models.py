@@ -7,8 +7,8 @@ import secrets
 import bcrypt
 from django.utils import timezone
 from django.contrib.auth.hashers import check_password as django_check_password
-from django.contrib.auth.models import BaseUserManager
 from .validators import RussianValidator
+# from shop.models import Order, Discount
 
 
 class User(AbstractUser):
@@ -23,125 +23,73 @@ class User(AbstractUser):
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
 
-# class Role(models.Model):
-#     """Таблица ролей"""
-#     name = models.CharField(max_length=50, unique=True,
-#                             verbose_name="Название роли")
-#     description = models.TextField(blank=True, verbose_name="Описание")
+    # def get_current_rank(self):
+    #     from shop.models import RankCategory
 
-#     def __str__(self):
-#         return self.name
+    #     total = self.get_total_spent()
+    #     rank = RankCategory.objects.filter(
+    #         min_total__lte=total
+    #     ).order_by('-min_total').first()
 
-#     class Meta:
-#         verbose_name = "Роль"
-#         verbose_name_plural = "Роли"
+    #     return rank
 
+    # def get_next_rank(self):
+    #     from shop.models import RankCategory
 
-# class BusinessElement(models.Model):
-#     """Таблица бизнес-объектов"""
-#     name = models.CharField(max_length=100, unique=True,
-#                             verbose_name="Название объекта")
-#     description = models.TextField(blank=True, verbose_name="Описание")
+    #     total = self.get_total_spent()
+    #     next_rank = RankCategory.objects.filter(
+    #         min_total__gt=total
+    #     ).order_by('min_total').first()
 
-#     def __str__(self):
-#         return self.name
+    #     return next_rank
 
-#     class Meta:
-#         verbose_name = "Бизнес-объект"
-#         verbose_name_plural = "Бизнес-объекты"
+    # def get_rank_progress(self):
+    #     """Возвращает данные о прогрессе до следующего ранга"""
+    #     total_spent = self.get_total_spent()
+    #     current_rank = self.get_current_rank()
+    #     next_rank = self.get_next_rank()
 
+    #     if not current_rank:
+    #         return None
 
-# class AccessRoleRule(models.Model):
-#     """Таблица правил доступа ролей к объектам"""
-#     role = models.ForeignKey(Role, on_delete=models.CASCADE,
-#                              related_name='access_rules', verbose_name="Роль")
-#     element = models.ForeignKey(BusinessElement, on_delete=models.CASCADE,
-#                                 related_name='access_rules', verbose_name="Бизнес-объект")
+    #     if not next_rank:
+    #         return {
+    #             'current_rank': current_rank,
+    #             'next_rank': None,
+    #             'total_spent': total_spent,
+    #             'progress_percent': 100,
+    #             'needed': 0,
+    #             'is_max_rank': True
+    #         }
 
-#     read_permission = models.BooleanField(
-#         default=False, verbose_name="Чтение своих")
-#     read_all_permission = models.BooleanField(
-#         default=False, verbose_name="Чтение всех")
-#     create_permission = models.BooleanField(
-#         default=False, verbose_name="Создание")
-#     update_permission = models.BooleanField(
-#         default=False, verbose_name="Обновление своих")
-#     update_all_permission = models.BooleanField(
-#         default=False, verbose_name="Обновление всех")
-#     delete_permission = models.BooleanField(
-#         default=False, verbose_name="Удаление своих")
-#     delete_all_permission = models.BooleanField(
-#         default=False, verbose_name="Удаление всех")
+    #     current_min = float(current_rank.min_total)
+    #     next_min = float(next_rank.min_total)
+    #     spent_from_current = total_spent - current_min
+    #     needed_for_next = next_min - current_min
 
-#     class Meta:
-#         verbose_name = "Правило-доступа"
-#         verbose_name_plural = "Правила-доступа"
+    #     progress_percent = (spent_from_current / needed_for_next) * \
+    #         100 if needed_for_next > 0 else 0
 
+    #     return {
+    #         'current_rank': current_rank,
+    #         'next_rank': next_rank,
+    #         'total_spent': total_spent,
+    #         'progress_percent': min(100, max(0, progress_percent)),
+    #         'needed': max(0, next_min - total_spent),
+    #         'is_max_rank': False
+    #     }
 
-# class UserManager(BaseUserManager):
-#     def create_user(self, email, password=None, **extra_fields):
-#         if not email:
-#             raise ValueError('Email обязателен')
-#         if 'first_name' not in extra_fields:
-#             raise ValueError('Имя обязательно')
-#         if 'last_name' not in extra_fields:
-#             raise ValueError('Фамилия обязательна')
+    def get_total_spent(self):
+        """Сумма всех оплаченных заказов в рублях"""
+        from shop.models import Order, Currency
 
-#         email = self.normalize_email(email)
+        total_in_rubles = 0
+        paid_orders = Order.objects.filter(user=self, status='Paid')
 
-#         if 'role' not in extra_fields:
-#             user_role, created = Role.objects.get_or_create(
-#                 name='User',
-#                 defaults={'description': 'Обычный пользователь'}
-#             )
-#             extra_fields['role'] = user_role
+        for order in paid_orders:
+            total_in_rubles += Currency.convert_amount_to_rubles(
+                order.total_amount,
+                order.currency.code
+            )
 
-#         user = self.model(email=email, **extra_fields)
-
-#         if password:
-#             user.set_password(password)
-#         else:
-#             user.set_unusable_password()
-
-#         user.save(using=self._db)
-#         return user
-
-#     def create_superuser(self, email, password=None, **extra_fields):
-#         admin_role, created = Role.objects.get_or_create(
-#             name='Admin',
-#             defaults={'description': 'Полный доступ ко всему'}
-#         )
-
-#         extra_fields.setdefault('is_staff', True)
-#         extra_fields.setdefault('is_superuser', True)
-#         extra_fields.setdefault('role', admin_role)
-
-#         return self.create_user(email, password, **extra_fields)
-
-
-# class Session(models.Model):
-#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     session_key = models.CharField(max_length=255, unique=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     expires_at = models.DateTimeField()
-#     is_active = models.BooleanField(default=True)
-
-#     @classmethod
-#     def create_session(cls, user):
-#         session_key = secrets.token_urlsafe(64)
-#         expires_at = timezone.now() + timedelta(days=7)
-
-#         cls.objects.create(
-#             user=user,
-#             session_key=session_key,
-#             expires_at=expires_at
-#         )
-#         return session_key
-
-#     def is_valid(self):
-#         return self.is_active and timezone.now() < self.expires_at
-
-#     class Meta:
-#         verbose_name = "Сессия"
-#         verbose_name_plural = "Сессии"
+        return round(total_in_rubles, 2)

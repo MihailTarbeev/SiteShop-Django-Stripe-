@@ -22,7 +22,7 @@
                 <h1 class="item-title">{{ item.name }}</h1>
                 
                 <div class="item-price-section">
-                    <span class="item-price">{{ item.price }} {{ item.get_currency_display }}</span>
+                    <span class="item-price">{{ item.price }} {{ item.currency.symbol }}</span>
                     {% if item.old_price %}
                     <span class="item-old-price">{{ item.old_price }} ₽</span>
                     {% endif %}

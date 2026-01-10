@@ -90,7 +90,7 @@
             <strong>Продавец:</strong> {{ item.owner.first_name }}
         </p>
         <p class="product_price" style="font-size: 18px; font-weight: bold; color: #d32f2f; margin: 15px 0;">
-            {{ item.price }} {{ item.get_currency_display }}
+            {{ item.price }} {{ item.currency.symbol }}
         </p>
     </div>
 

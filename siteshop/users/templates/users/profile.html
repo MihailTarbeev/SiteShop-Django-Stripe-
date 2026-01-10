@@ -2,7 +2,7 @@
 {% load static %}
 {% block "content" %}
 
-  <div class="profile-container">
+<div class="profile-container">
   <h2 class="profile-title">Профиль</h2>
   
   <div class="profile-card">
@@ -30,32 +30,118 @@
         </div>
       </div>
 
-        <p>{{ form.non_field_errors }}</p>
+      <!-- Блок прогресса ранга -->
+      {% if rank_progress %}
+      <div class="rank-progress-card">
+          <div class="rank-header">
+              <div>
+                  <div class="rank-badge">
+                      {{ rank_progress.current_rank.name }}
+                  </div>
+                  <h3 class="rank-amount">
+                      {{ rank_progress.total_spent|floatformat:2 }} ₽
+                  </h3>
+                  <p class="rank-subtitle">
+                      Общая сумма покупок
+                  </p>
+              </div>
+              
+              <div class="rank-percent-circle">
+                  {{ rank_progress.progress_percent|floatformat:0 }}%
+              </div>
+          </div>
+          
+          <div class="progress-container">
+              <div class="progress-track">
+                  <div class="progress-fill" style="width: {{ rank_progress.progress_percent|floatformat:0 }}%;">
+                      <div class="progress-marker"></div>
+                  </div>
+              </div>
+              
+              <div class="progress-labels">
+                  <div style="display: flex; justify-content: space-between;">
+                      <div class="progress-label-container">
+                          <div class="progress-dot current"></div>
+                          <span class="progress-value current">
+                              {{ rank_progress.current_rank.min_total|floatformat:0 }} ₽
+                          </span>
+                      </div>
+                      <div class="progress-label-container">
+                          <div class="progress-dot {% if rank_progress.next_rank %}next{% else %}max{% endif %}"></div>
+                          <span class="progress-value {% if rank_progress.next_rank %}next{% else %}max{% endif %}">
+                              {% if rank_progress.next_rank %}
+                                  {{ rank_progress.next_rank.min_total|floatformat:0 }} ₽
+                              {% else %}
+                                  MAX
+                              {% endif %}
+                          </span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="stats-grid">
+              <div class="stat-box stat-next">
+                  <div class="stat-label">
+                      {% if rank_progress.next_rank %}До следующего уровня{% else %}Достижение{% endif %}
+                  </div>
+                  <div class="stat-value {% if not rank_progress.next_rank %}stat-max{% endif %}">
+                      {% if rank_progress.next_rank %}
+                          {{ rank_progress.needed|floatformat:2 }} ₽
+                      {% else %}
+                          🏆 Максимум
+                      {% endif %}
+                  </div>
+              </div>
+              
+              {% if rank_progress.current_rank.discount %}
+              <div class="discount-box">
+                  <div class="discount-label">
+                      Ваша скидка
+                  </div>
+                  <div class="discount-value">
+                      {% if rank_progress.current_rank.discount.percent_off %}
+                          {{ rank_progress.current_rank.discount.percent_off }}%
+                      {% else %}
+                          {{ rank_progress.current_rank.discount.amount_off }} ₽
+                      {% endif %}
+                  </div>
+              </div>
+              {% endif %}
+          </div>
+      </div>
+      {% endif %}
 
+      <!-- Ошибки формы -->
+      {% if form.non_field_errors %}
+      <div class="form-global-error">
+          {{ form.non_field_errors }}
+      </div>
+      {% endif %}
 
+      <!-- Поля формы -->
+      <div class="form-fields-grid">
+          {% for field in form %}
+              {% if field.name != 'photo' %}
+              <div class="form-group {% if field.name == 'username' or field.name == 'email' %}disabled-field{% endif %}">
+                  <label for="{{ field.id_for_label }}" class="form-label">
+                      {{ field.label }}
+                      {% if field.field.required %}
+                          <span class="required-star">*</span>
+                      {% endif %}
+                      
+                      {% if field.field.disabled %}
+                          <span class="disabled-icon" title="Это поле нельзя изменить">🔒</span>
+                      {% endif %}
+                  </label>
 
-<div class="form-fields-grid">
-    {% for field in form %}
-        {% if field.name != 'photo' %}
-        <div class="form-group {% if field.name == 'username' or field.name == 'email' %}disabled-field{% endif %}">
-            <label for="{{ field.id_for_label }}" class="form-label">
-                {{ field.label }}
-                {% if field.field.required %}
-                    <span class="required-star">*</span>
-                {% endif %}
-                
-                {% if field.field.disabled %}
-                    <span class="disabled-icon" title="Это поле нельзя изменить">🔒</span>
-                {% endif %}
-            </label>
-            
-            {% if field.name == 'email' %}
+                            {% if field.name == 'email' %}
                 <div class="disabled-input-wrapper">
                     <input type="email" name="{{ field.name }}" 
-                           id="{{ field.id_for_label }}" 
-                           value="{{ field.value|default_if_none:'' }}"
-                           class="form-input email-input {% if field.field.disabled %}disabled-input{% endif %}"
-                           {% if field.field.disabled %}disabled{% endif %}>
+                        id="{{ field.id_for_label }}" 
+                        value="{{ field.value|default_if_none:'' }}"
+                        class="form-input email-input {% if field.field.disabled %}disabled-input{% endif %}"
+                        {% if field.field.disabled %}disabled{% endif %}>
                     {% if field.field.disabled %}
                         <div class="disabled-hint">
                             <small>Email нельзя изменить после регистрации</small>
@@ -65,10 +151,10 @@
             {% elif field.name == 'username' %}
                 <div class="disabled-input-wrapper">
                     <input type="text" name="{{ field.name }}" 
-                           id="{{ field.id_for_label }}" 
-                           value="{{ field.value|default_if_none:'' }}"
-                           class="form-input text-input {% if field.field.disabled %}disabled-input{% endif %}"
-                           {% if field.field.disabled %}disabled{% endif %}>
+                        id="{{ field.id_for_label }}" 
+                        value="{{ field.value|default_if_none:'' }}"
+                        class="form-input text-input {% if field.field.disabled %}disabled-input{% endif %}"
+                        {% if field.field.disabled %}disabled{% endif %}>
                     {% if field.field.disabled %}
                         <div class="disabled-hint">
                             <small>Логин нельзя изменить после регистрации</small>
@@ -77,15 +163,15 @@
                 </div>
             {% elif field.field.widget.input_type == 'text' %}
                 <input type="text" name="{{ field.name }}" 
-                       id="{{ field.id_for_label }}" 
-                       value="{{ field.value|default_if_none:'' }}"
-                       class="form-input text-input {% if field.field.disabled %}disabled-input{% endif %}"
-                       {% if field.field.disabled %}disabled{% endif %}>
+                    id="{{ field.id_for_label }}" 
+                    value="{{ field.value|default_if_none:'' }}"
+                    class="form-input text-input {% if field.field.disabled %}disabled-input{% endif %}"
+                    {% if field.field.disabled %}disabled{% endif %}>
             {% elif field.field.widget.input_type == 'textarea' %}
                 <textarea name="{{ field.name }}" 
-                          id="{{ field.id_for_label }}" 
-                          class="form-textarea {% if field.field.disabled %}disabled-input{% endif %}"
-                          {% if field.field.disabled %}disabled{% endif %}>{{ field.value|default_if_none:'' }}</textarea>
+                        id="{{ field.id_for_label }}" 
+                        class="form-textarea {% if field.field.disabled %}disabled-input{% endif %}"
+                        {% if field.field.disabled %}disabled{% endif %}>{{ field.value|default_if_none:'' }}</textarea>
             {% elif field.field.widget.input_type == 'select' %}
                 <select name="{{ field.name }}" 
                         id="{{ field.id_for_label }}"
@@ -97,107 +183,79 @@
                         </option>
                     {% endfor %}
                 </select>
-            {% elif field.field.widget.input_type == 'file' %}
-
             {% else %}
                 {{ field }}
             {% endif %}
-            
-            {% if field.help_text %}
-                <div class="form-help-text">
-                    {{ field.help_text }}
-                </div>
-            {% endif %}
-            
-            <div class="form-error field-error">
-                {{ field.errors }}
-            </div>
-        </div>
-        {% endif %}
-    {% endfor %}
-</div>
+                  
+                  <div class="form-error field-error">
+                      {{ field.errors }}
+                  </div>
+              </div>
+              {% endif %}
+          {% endfor %}
+      </div>
 
+      <!-- Кнопка сохранения -->
       <div class="form-submit-section">
-        <button type="submit" class="submit-button">
-          <span class="button-icon">💾</span> Сохранить изменения
-        </button>
+          <button type="submit" class="submit-button">
+            <span class="button-icon">💾</span> Сохранить изменения
+          </button>
       </div>
     </form>
 
     <hr class="section-divider">
     
+    <!-- Кнопки действий -->
     <div class="action-buttons">
-      {% comment %} <a href="" class="action-button password-button">
-        <span class="button-icon">🔑</span> Сменить пароль
-      </a> {% endcomment %}
-      
       <a href="{% url 'users:logout' %}" class="action-button logout-button" style="color: white">
         <span class="button-icon">🚪</span> Выйти
       </a>
-      
     </div>
   </div>
 </div>
-            <hr>
-            {% if object.items.all.count > 0 %}
-              <h3><span>Ваши товары</span></h3> 
 
-              <div style="
-                  display: flex;
-                  flex-wrap: wrap;
-                  gap: 20px;
-                  justify-content: flex-start;
-              ">
-                  {% for item in object.items.all %}
-                  <div class="col col_14 product_gallery" style="
-                      width: calc(25% - 15px); 
-                      min-width: 100px; /* Минимальная ширина */
-                      text-align: center;
-                      padding: 15px;
-                      border: 1px solid #eee;
-                      border-radius: 8px;
-                      background: white;
-                      display: flex;
-                      flex-direction: column;
-                      box-sizing: border-box;
-                      min-height: 200px;
-                  ">
-                      
-                      {% if item.image %}
-                      <a href="{{ item.get_absolute_url }}">
-                          <img src="{{ item.image.url }}" style="width: 100%; height: 100px; object-fit: contain;"/>
-                      </a>
-                      {% else %}
-                      <a href="{{ item.get_absolute_url }}">
-                          <img src="{{ default_item_image }}" style="width: 100%; height: 100px; object-fit: contain;"/>
-                      </a>
-                      {% endif %}
+<!-- Блок с товарами пользователя -->
+<hr>
+{% if user_items.count > 0 %}
+  <h3><span>Ваши товары</span></h3> 
 
-                      <div style="flex: 1; width: 100%; padding-top: 10px;">
-                          <h2 style="margin: 0 0 8px; min-height: 40px;">
-                              <a href="{{ item.get_absolute_url }}" style="color: blue; font-size: 15px; text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                  {{ item.name }}
-                              </a>
-                          </h2>
-                          
-                          <p style="margin: 8px 0; color: #666; line-height: 1.4; font-size: 13px; min-height: 50px; max-height: 70px; overflow: hidden;">
-                              {{ item.description|truncatechars:45 }}
-                          </p>
-                      </div>
+  <div class="user-items-grid">
+      {% for item in user_items %}
+      <div class="user-item-card">
+          
+          {% if item.image %}
+          <a href="{{ item.get_absolute_url }}" class="item-image-link">
+              <img src="{{ item.image.url }}" alt="{{ item.name }}" class="item-image" />
+          </a>
+          {% else %}
+          <a href="{{ item.get_absolute_url }}" class="item-image-link">
+              <img src="{{ default_item_image }}" alt="{{ item.name }}" class="item-image" />
+          </a>
+          {% endif %}
 
-                      <div style="width: 100%; margin-top: auto;">
-                          <p class="product_price" style="font-size: 16px; font-weight: bold; color: #d32f2f; margin: 10px 0;">
-                              {{ item.price }} ₽
-                          </p>
-                      </div>
-                  </div>
-                  {% endfor %}
-              </div>
+          <div class="item-content">
+              <h3 class="item-title">
+                  <a href="{{ item.get_absolute_url }}">
+                      {{ item.name }}
+                  </a>
+              </h3>
+              
+              <p class="item-description">
+                  {{ item.description|truncatechars:45 }}
+              </p>
+          </div>
 
-            {% else %}
-              <h3><span>Вы пока не добавили ни один товар</span></h3>
-            {% endif %}
+          <div class="item-footer">
+              <p class="item-price">
+                  {{ item.price }} {{ item.currency.symbol }}
+              </p>
+          </div>
+      </div>
+      {% endfor %}
+  </div>
 
-          </form>
+{% else %}
+  <h3><span>Вы пока не добавили ни один товар</span></h3>
+{% endif %}
 
 {% endblock %}

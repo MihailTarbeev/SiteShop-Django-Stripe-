@@ -26,7 +26,7 @@
         <p style="margin-bottom: 0;">
             В корзине находятся товары в валютах: 
             {% for currency in currencies %}
-                {{ currency }}{% if not forloop.last %}, {% endif %}
+                {{ currency.name }}{% if not forloop.last %}, {% endif %}
             {% endfor %}
         </p>
         <p style="margin-top: 10px; margin-bottom: 0;">
@@ -39,7 +39,7 @@
         {% for cart_item in cart_items %}
         <div class="cart-item-card" 
              data-item-price="{{ cart_item.item.price }}"
-             data-item-currency="{{ cart_item.item.get_currency_display }}">
+             data-item-currency="{{ cart_item.item.currency.symbol }}">
             <div class="cart-item-image">
                 {% if cart_item.item.image %}
                 <img src="{{ cart_item.item.image.url }}" alt="{{ cart_item.item.name }}">
@@ -50,7 +50,7 @@
             
             <div class="cart-item-info">
                 <h3 class="cart-item-title">{{ cart_item.item.name }}</h3>
-                <p class="cart-item-price">{{ cart_item.item.price }} {{ cart_item.item.get_currency_display }}</p>
+                <p class="cart-item-price">{{ cart_item.item.price }} {{ cart_item.item.currency.symbol }}</p>
                 
                 <div class="cart-item-quantity">
                     <form action="{% url 'update_cart_item' cart_item.item.slug %}" method="POST" class="update-quantity-form">
@@ -71,7 +71,7 @@
             <div class="cart-item-total">
                 <span class="total-label">Сумма:</span>
                 <span class="total-price">
-                    {{ cart_item.calculate_total_price|floatformat:2 }} {{ cart_item.item.get_currency_display }}
+                    {{ cart_item.calculate_total_price|floatformat:2 }} {{ cart_item.item.currency.symbol }}
                 </span>
             </div>
         </div>
@@ -89,8 +89,8 @@
             <span class="summary-label">Общая сумма (без налогов):</span>
             <span class="summary-value total-amount" id="cart-total"
                 data-original-total="{{ total_price|floatformat:2 }}"
-                data-currency="{{ cart_items.0.item.get_currency_display }}">
-                {{ total_price|floatformat:2 }} {{ cart_items.0.item.get_currency_display }}
+                data-currency="{{ cart_items.0.item.currency.symbol }}">
+                {{ total_price|floatformat:2 }} {{ cart_items.0.item.currency.symbol }}
             </span>
         </div>
         {% else %}

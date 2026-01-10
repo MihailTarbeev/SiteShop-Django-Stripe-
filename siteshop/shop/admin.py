@@ -1,4 +1,4 @@
-from .models import Item, Category, Tax, Discount, Cart, CartItem, Order, OrderItem
+from .models import Currency, Item, Category, RankCategory, Tax, Discount, Cart, CartItem, Order, OrderItem
 from django.contrib import admin
 from .models import Item, Category, Tax, Discount, Cart, CartItem
 from django.utils.safestring import mark_safe
@@ -160,15 +160,13 @@ class OrderAdmin(admin.ModelAdmin):
               'total_amount', 'currency',
               'created_at', 'updated_at')
 
+    readonly_fields = ('user', 'stripe_session_id', 'stripe_payment_intent_id', 'status',
+                       'total_amount', 'currency',
+                       'created_at', 'updated_at')
     list_display = ('id', 'user', 'status', 'total_amount', 'currency',
                     'created_at')
 
     list_filter = ('status', 'currency', 'created_at')
-
-    search_fields = ('user__username', 'user__email', 'stripe_session_id',
-                     'stripe_payment_intent_id')
-
-    readonly_fields = ('created_at', 'updated_at')
 
     ordering = ('-created_at',)
 
@@ -181,11 +179,6 @@ class OrderItemAdmin(admin.ModelAdmin):
     list_display = ('id', 'order', 'item_name', 'quantity', 'price',
                     'currency', 'get_total_price_display')
 
-    list_filter = ('currency', 'order__status')
-
-    search_fields = ('item_name', 'order__stripe_session_id',
-                     'order__user__username')
-
     readonly_fields = ('get_total_price_display',)
 
     ordering = ('-id',)
@@ -197,5 +190,27 @@ class OrderItemAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return [field.name for field in self.model._meta.fields] + ['get_total_price_display']
+            return ('order', 'item', 'quantity', 'price', 'currency',
+                    'item_name', 'taxes', 'get_total_price_display')
         return self.readonly_fields
+
+
+@admin.register(RankCategory)
+class RankCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'min_total', 'discount')
+    ordering = ('min_total',)
+
+
+@admin.register(Currency)
+class CurrencyAdmin(admin.ModelAdmin):
+    fields = ('code', 'symbol', 'name', 'rate_to_rub',
+              'is_active', "min_amount")
+
+    list_display = ('code', 'symbol', 'name', 'rate_to_rub',
+                    'is_active', 'updated_at', "min_amount")
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('code', 'symbol', 'name', 'rate_to_rub',
+                    'is_active', 'updated_at', "min_amount")
+        return ('updated_at',)

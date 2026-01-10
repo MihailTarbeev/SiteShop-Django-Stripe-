@@ -111,7 +111,7 @@ def create_session_item(request, item_slug):
     session = stripe.checkout.Session.create(
         line_items=[{
             'price_data': {
-                'currency': item.currency,
+                'currency': item.currency.code,
                 'product_data': {
                     'name': item.name,
                 },
@@ -335,7 +335,7 @@ def create_session_cart(request):
         line_items=[
             {
                 'price_data': {
-                    'currency': cart_item.item.currency,
+                    'currency': cart_item.item.currency.code,
                     'product_data': {'name': cart_item.item.name},
                     'unit_amount': int(cart_item.item.price * 100),
                 },

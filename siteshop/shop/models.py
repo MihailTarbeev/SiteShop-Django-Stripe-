@@ -7,7 +7,7 @@ from users.validators import RussianValidator
 import stripe
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
-from .utils import CURRENCY_CHOICES, MIN_AMOUNTS
+# from .utils import CURRENCY_CHOICES, MIN_AMOUNTS
 
 
 class Tax(models.Model):
@@ -68,7 +68,6 @@ class Tax(models.Model):
             raise ValidationError(f"Ошибка при сохранении налога: {str(e)}")
 
     def delete(self, *args, **kwargs):
-        """Удаляет налоговую ставку из Stripe при удалении из БД"""
         try:
             if self.stripe_tax_id:
                 stripe.TaxRate.modify(
@@ -122,8 +121,13 @@ class Item(models.Model):
 
     slug = models.SlugField(max_length=100, unique=True, verbose_name="URL",)
 
-    currency = models.CharField(
-        max_length=3, choices=CURRENCY_CHOICES, default=CURRENCY_CHOICES[0][0], verbose_name="Валюта",)
+    currency = models.ForeignKey(
+        "Currency",
+        on_delete=models.PROTECT,
+        related_name='items',
+        verbose_name="Валюта",
+        limit_choices_to={'is_active': True}
+    )
 
     taxes = models.ManyToManyField(
         Tax,
@@ -138,7 +142,7 @@ class Item(models.Model):
     class Meta:
         verbose_name = "Товар"
         verbose_name_plural = "Товары"
-        ordering = ["-name"]
+        ordering = ["-created_at"]
 
     def get_absolute_url(self):
         return reverse("item", kwargs={"item_slug": self.slug})
@@ -185,8 +189,14 @@ class Discount(models.Model):
     percent_off = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,
                                       verbose_name="Процент скидки", validators=[MinValueValidator(0), MaxValueValidator(100)])
 
-    currency = models.CharField(
-        max_length=3, choices=CURRENCY_CHOICES, null=True, blank=True, verbose_name="Валюта",)
+    currency = models.ForeignKey(
+        "Currency",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Валюта",
+        limit_choices_to={'is_active': True},
+    )
 
     duration = models.CharField(max_length=10, choices=DURATION_CHOICES,
                                 default='forever', verbose_name="Длительность действия")
@@ -359,10 +369,11 @@ class Order(models.Model):
         verbose_name="Общая сумма"
     )
 
-    currency = models.CharField(
-        max_length=3,
-        choices=CURRENCY_CHOICES,
-        verbose_name="Валюта"
+    currency = models.ForeignKey(
+        "Currency",
+        on_delete=models.PROTECT,
+        verbose_name="Валюта",
+        related_name='orders'
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -404,9 +415,9 @@ class OrderItem(models.Model):
         verbose_name="Цена за единицу"
     )
 
-    currency = models.CharField(
-        max_length=3,
-        choices=CURRENCY_CHOICES,
+    currency = models.ForeignKey(
+        "Currency",
+        on_delete=models.PROTECT,
         verbose_name="Валюта"
     )
 
@@ -429,4 +440,95 @@ class OrderItem(models.Model):
         verbose_name_plural = "Товары в заказе"
 
     def __str__(self):
-        return f"{self.item_name} x {self.quantity}"
+        return f"{self.item_name} x {self.quantity} ({self.price} {self.currency.symbol})"
+
+
+class RankCategory(models.Model):
+    """Модель рангов пользователей"""
+    name = models.CharField(
+        max_length=50,
+        verbose_name="Название категории",
+    )
+
+    min_total = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Минимальная сумма",
+    )
+
+    discount = models.ForeignKey(
+        'Discount',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Купон",
+    )
+
+    class Meta:
+        verbose_name = "Категория ранга"
+        verbose_name_plural = "Категории рангов"
+        ordering = ['min_total']
+
+    def __str__(self):
+        return self.name
+
+
+class Currency(models.Model):
+    """Модель валют"""
+    code = models.CharField(
+        max_length=3,
+        unique=True,
+        verbose_name="Код валюты",
+    )
+
+    symbol = models.CharField(
+        max_length=5,
+        verbose_name="Символ",
+    )
+
+    name = models.CharField(
+        max_length=50,
+        verbose_name="Название",
+    )
+
+    rate_to_rub = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Курс к рублю",
+    )
+
+    min_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Минимальная сумма для товара",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Активна"
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Дата обновления курса"
+    )
+
+    class Meta:
+        verbose_name = "Валюта"
+        verbose_name_plural = "Валюты"
+        ordering = ['code']
+
+    def __str__(self):
+        return f"{self.code} ({self.symbol}) - {self.name}"
+
+    @classmethod
+    def convert_amount_to_rubles(cls, amount, currency_code):
+        """Конвертировать сумму в рубли."""
+        try:
+            currency = cls.objects.get(code__iexact=currency_code)
+            amount_in_main_unit = float(amount)
+            if currency.code.lower() == 'rub':
+                return amount_in_main_unit
+            return amount_in_main_unit * float(currency.rate_to_rub)
+        except cls.DoesNotExist:
+            return 0
