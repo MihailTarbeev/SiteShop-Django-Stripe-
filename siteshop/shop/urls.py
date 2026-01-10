@@ -19,7 +19,9 @@ urlpatterns = [
     path('api/v1/coupons/', views.stripe_coupons, name='coupons'),
 
     path('cart/', views.view_cart, name='view_cart'),
+
     path('cart/clear/', views.clear_cart, name='clear_cart'),
+
     path('item/<slug:item_slug>/add-to-cart/',
          views.add_to_cart, name='add_to_cart'),
     path('item/<slug:item_slug>/remove-from-cart/',

@@ -286,6 +286,18 @@ class Cart(models.Model):
     def __str__(self):
         return f"Корзина {self.user.username}"
 
+    def get_total_price(self):
+        total = 0
+        for cart_item in self.items.all():
+            total += cart_item.calculate_total_price()
+        return total
+
+    def get_total_quantity(self):
+        return sum(item.quantity for item in self.items.all())
+
+    def is_empty(self):
+        return self.items.count() == 0
+
 
 class CartItem(models.Model):
     """Модель для связи моделей Items и Cart"""
@@ -301,3 +313,6 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.cart.user.username} {self.item.name}"
+
+    def calculate_total_price(self):
+        return self.item.price * self.quantity

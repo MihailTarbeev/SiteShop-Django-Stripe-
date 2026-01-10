@@ -20,6 +20,14 @@
                 {% else %}
                 <li><a href="{% url "users:profile" %}">Профиль | {{ user.username }}</a></li>
                 {% endif %}
+
+
+                {% if title == "Корзина" %}
+                <li><a class="selected">🛒 Корзина</a></li>
+                {% else %}
+                <li><a href="{% url "view_cart" %}">🛒 Корзина</a></li>
+                {% endif %}
+
                 <li><a href="{% url "users:logout" %}">Выйти</a></li>
 
             {% else %}

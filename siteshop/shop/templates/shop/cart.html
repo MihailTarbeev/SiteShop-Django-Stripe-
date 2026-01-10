@@ -1,11 +1,40 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block javascript %}
+<script language="javascript" type="text/javascript" src="{% static 'shop/js/cart.js' %}"></script>
+{% endblock %}
+
 {% block "content" %}
 <div class="cart-page">
     <h1 class="cart-title">Корзина</h1>
     
     {% if cart_items %}
+    
+    {% if has_multiple_currencies %}
+    <div class="currency-warning" style="
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        color: #856404;
+    ">
+        <h3 style="margin-top: 0; color: #856404;">
+            ⚠️ В корзине товары в разных валютах
+        </h3>
+        <p style="margin-bottom: 0;">
+            В корзине находятся товары в валютах: 
+            {% for currency in currencies %}
+                {{ currency }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </p>
+        <p style="margin-top: 10px; margin-bottom: 0;">
+            Оформите товары в одной валюте отдельным заказом.
+        </p>
+    </div>
+    {% endif %}
+    
     <div class="cart-items">
         {% for cart_item in cart_items %}
         <div class="cart-item-card">
@@ -39,21 +68,37 @@
             
             <div class="cart-item-total">
                 <span class="total-label">Сумма:</span>
-                <span class="total-price">{{ cart_item.total_price }} {{ cart_item.item.get_currency_display }}</span>
+                <span class="total-price">{{ cart_item.calculate_total_price|floatformat:2 }} {{ cart_item.item.get_currency_display }}</span>
             </div>
         </div>
         {% endfor %}
     </div>
     
     <div class="cart-summary">
+        {% if not has_multiple_currencies %}
+        <div class="summary-item">
+            <span class="summary-label">Всего товаров:</span>
+            <span class="summary-value">{{ total_quantity }} шт.</span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Общая сумма:</span>
+            <span class="summary-value total-amount">
+                {{ total_price|floatformat:2 }} 
+                {{ cart_items.0.item.get_currency_display }}
+            </span>
+        </div>
+        {% else %}
         <div class="summary-item">
             <span class="summary-label">Всего товаров:</span>
             <span class="summary-value">{{ cart_items|length }} шт.</span>
         </div>
         <div class="summary-item">
             <span class="summary-label">Общая сумма:</span>
-            <span class="summary-value total-amount">{{ total_price }} руб.</span>
+            <span class="summary-value" style="color: #dc3545;">
+                Недоступно (разные валюты)
+            </span>
         </div>
+        {% endif %}
         
         <div class="cart-actions">
             <form action="{% url 'clear_cart' %}" method="POST">
@@ -62,7 +107,17 @@
             </form>
             
             <a href="{% url 'home' %}" class="continue-shopping">Продолжить покупки</a>
+            
+            {% if not has_multiple_currencies and cart_items %}
             <button class="checkout-btn" id="checkout-btn">Оформить заказ</button>
+            {% elif has_multiple_currencies %}
+            <button class="checkout-btn" style="
+                background: #6c757d;
+                cursor: not-allowed;
+            " disabled>
+                Невозможно оформить
+            </button>
+            {% endif %}
         </div>
     </div>
     
@@ -77,232 +132,4 @@
     </div>
     {% endif %}
 </div>
-
-<style>
-.cart-page {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.cart-title {
-    margin-bottom: 30px;
-    color: #333;
-}
-
-.cart-items {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.cart-item-card {
-    display: flex;
-    gap: 20px;
-    padding: 15px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background: white;
-    align-items: center;
-}
-
-.cart-item-image img {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 4px;
-}
-
-.cart-item-info {
-    flex: 1;
-}
-
-.cart-item-title {
-    margin: 0 0 5px 0;
-    font-size: 16px;
-    color: #333;
-}
-
-.cart-item-price {
-    margin: 0;
-    color: #28a745;
-    font-weight: bold;
-}
-
-.cart-item-quantity {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.update-quantity-form {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.qty-btn {
-    width: 30px;
-    height: 30px;
-    border: 1px solid #ddd;
-    background: white;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-.qty-input {
-    width: 40px;
-    height: 30px;
-    text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.update-btn {
-    padding: 5px 10px;
-    background: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-.remove-btn {
-    padding: 5px 10px;
-    background: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-.cart-item-total {
-    text-align: right;
-    min-width: 120px;
-}
-
-.total-label {
-    display: block;
-    color: #666;
-    font-size: 14px;
-}
-
-.total-price {
-    display: block;
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-}
-
-.cart-summary {
-    margin-top: 30px;
-    padding: 20px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background: white;
-}
-
-.summary-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
-}
-
-.total-amount {
-    font-size: 24px;
-    color: #28a745;
-}
-
-.cart-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
-
-.clear-cart-btn {
-    padding: 10px 15px;
-    background: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.continue-shopping {
-    padding: 10px 15px;
-    background: #17a2b8;
-    color: white;
-    border-radius: 4px;
-    text-decoration: none;
-}
-
-.checkout-btn {
-    padding: 10px 20px;
-    background: #28a745;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    flex: 1;
-}
-
-.empty-cart {
-    text-align: center;
-    padding: 50px 20px;
-}
-
-.empty-cart h2 {
-    color: #666;
-    margin: 20px 0 10px 0;
-}
-
-.start-shopping-btn {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 10px 20px;
-    background: #007bff;
-    color: white;
-    border-radius: 4px;
-    text-decoration: none;
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Обработчики количества в корзине
-    document.querySelectorAll('.qty-btn.minus').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const input = this.closest('.update-quantity-form').querySelector('.qty-input');
-            if (parseInt(input.value) > 1) {
-                input.value = parseInt(input.value) - 1;
-            }
-        });
-    });
-    
-    document.querySelectorAll('.qty-btn.plus').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const input = this.closest('.update-quantity-form').querySelector('.qty-input');
-            if (parseInt(input.value) < 99) {
-                input.value = parseInt(input.value) + 1;
-            }
-        });
-    });
-    
-    // Кнопка оформления заказа
-    const checkoutBtn = document.getElementById('checkout-btn');
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', function() {
-            alert('Функция оформления заказа будет реализована позже!');
-            // Здесь будет редирект на оформление заказа
-        });
-    }
-});
-</script>
 {% endblock %}

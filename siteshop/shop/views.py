@@ -15,7 +15,6 @@ import stripe
 from django.conf import settings
 from .forms import ItemForm, AddToCartForm
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 
 
 class PeopleHome(ListView):
@@ -185,8 +184,25 @@ def stripe_coupons(request):
         return Response({'error': str(e)}, status=400)
 
 
+@login_required
 def view_cart(request):
-    pass
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart_items = cart.items.select_related('item').all()
+    total_price = cart.get_total_price()
+    currencies = set(cart_item.item.currency for cart_item in cart_items)
+    total_quantity = cart.get_total_quantity()
+
+    context = {
+        'cart': cart,
+        'cart_items': cart_items,
+        "total_price": total_price,
+        "total_quantity": total_quantity,
+        'title': 'Корзина',
+        'has_multiple_currencies': len(currencies) > 1,
+        'currencies': currencies,
+    }
+
+    return render(request, 'shop/cart.html', context)
 
 
 def clear_cart(request):
@@ -195,12 +211,10 @@ def clear_cart(request):
 
 @login_required
 def add_to_cart(request, item_slug):
-
     item = get_object_or_404(Item, slug=item_slug, is_available=True)
-
     cart, created = Cart.objects.get_or_create(user=request.user)
-
     form = AddToCartForm(request.POST)
+
     if form.is_valid():
         quantity = form.cleaned_data['quantity']
 
@@ -214,17 +228,40 @@ def add_to_cart(request, item_slug):
             cart_item.quantity += quantity
             cart_item.save()
 
-        messages.success(
-            request,
-            f'Товар "{item.name}" добавлен в корзину!'
-        )
-
     return redirect('item', item_slug=item_slug)
 
 
-def remove_from_cart(request):
-    pass
+@login_required
+def remove_from_cart(request, item_slug):
+    item = get_object_or_404(Item, slug=item_slug)
+
+    cart = Cart.objects.get(user=request.user)
+    if cart:
+        cart_item = cart.items.get(item=item)
+        if cart_item:
+            cart_item.delete()
+
+    return redirect('view_cart')
 
 
-def update_cart_item(request):
-    pass
+@login_required
+def update_cart_item(request, item_slug):
+    item = get_object_or_404(Item, slug=item_slug)
+
+    form = AddToCartForm(request.POST)
+
+    if form.is_valid():
+        quantity = form.cleaned_data['quantity']
+
+        cart = Cart.objects.filter(user=request.user).first()
+        if cart:
+            cart_item = cart.items.filter(item=item).first()
+            if cart_item:
+                if quantity > 0:
+                    cart_item.quantity = quantity
+                    cart_item.save()
+
+                else:
+                    cart_item.delete()
+
+    return redirect('view_cart')
