@@ -726,3 +726,46 @@
 .success-icon {
     color: white;
 }
+
+.cart-status {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.cart-status-text {
+    color: #28a745;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.go-to-cart-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.go-to-cart-btn:hover {
+    background-color: #0056b3;
+    color: white;
+    text-decoration: none;
+}
+
+.go-to-cart-btn .cart-icon {
+    fill: white;
+}

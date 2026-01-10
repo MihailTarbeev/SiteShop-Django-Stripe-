@@ -86,7 +86,7 @@
         
         {% if not has_multiple_currencies %}
         <div class="summary-item">
-            <span class="summary-label">Общая сумма:</span>
+            <span class="summary-label">Общая сумма (без налогов):</span>
             <span class="summary-value total-amount" id="cart-total"
                 data-original-total="{{ total_price|floatformat:2 }}"
                 data-currency="{{ cart_items.0.item.get_currency_display }}">

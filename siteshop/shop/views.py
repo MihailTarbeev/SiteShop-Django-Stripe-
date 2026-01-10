@@ -205,8 +205,12 @@ def view_cart(request):
     return render(request, 'shop/cart.html', context)
 
 
+@login_required
 def clear_cart(request):
-    pass
+    if request.method == 'POST':
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        cart.items.all().delete()
+    return redirect('view_cart')
 
 
 @login_required

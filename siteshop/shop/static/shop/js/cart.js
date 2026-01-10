@@ -283,8 +283,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (confirm('У вас есть несохраненные изменения. Сохранить перед оформлением заказа?')) {
                     unsavedForms.forEach(form => form.submit());
                 }
-            } else {
-                alert('Функция оформления заказа будет реализована позже!');
             }
         });
     }

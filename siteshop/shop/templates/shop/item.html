@@ -6,8 +6,6 @@
 {% endblock %}
 
 {% block "content" %}
-
-
 <div id="item-detail-page">
     <div class="item-detail-card">
         {% block confirm_delete %}{% endblock %}
@@ -36,7 +34,6 @@
                 </div>
                 
                 <div class="item-actions">
-
                     {% if user == item.owner %}
                     <a href="{% url "edit_item" item.slug %}" class="edit-btn">
                         <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16">
@@ -52,9 +49,7 @@
                     </a>
                     {% endif %}
                     
-                    {% if item_in_cart %}
-                    <p>В корзине: {{ cart_quantity }} шт.</p>
-                    {% endif %}
+                    
                     <form action="{% url 'add_to_cart' item.slug %}" method="POST" class="add-to-cart-form">
                         {% csrf_token %}
                         <div class="quantity-selector">
@@ -70,6 +65,18 @@
                         </button>
                     </form>
 
+
+                    {% if item_in_cart %}
+                    <div class="cart-status">
+                        <span class="cart-status-text">В корзине: {{ cart_quantity }} шт.</span>
+                        <a href="{% url 'view_cart' %}" class="go-to-cart-btn">
+                            <svg class="cart-icon" viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M17,18A2,2 0 0,1 19,20A2,2 0 0,1 17,22C15.89,22 15,21.1 15,20C15,18.89 15.89,18 17,18M1,2H4.27L5.21,4H20A1,1 0 0,1 21,5C21,5.17 20.95,5.34 20.88,5.5L17.3,11.97C16.96,12.58 16.3,13 15.55,13H8.1L7.2,14.63L7.17,14.75A0.25,0.25 0 0,0 7.42,15H19V17H7C5.89,17 5,16.1 5,15C5,14.65 5.09,14.32 5.24,14.04L6.6,11.59L3,4H1V2M7,18A2,2 0 0,1 9,20A2,2 0 0,1 7,22C5.89,22 5,21.1 5,20C5,18.89 5.89,18 7,18M16,11L18.78,6H6.14L8.5,11H16Z"/>
+                            </svg>
+                            Перейти в корзину
+                        </a>
+                    </div>
+                    {% endif %}
                     
                     <form action="{% url "create_session" item.slug %}" method="POST" class="buy-form">
                         {% csrf_token %}
@@ -77,7 +84,7 @@
                             <svg class="buy-icon" viewBox="0 0 24 24" width="20" height="20">
                                 <path fill="currentColor" d="M17,18A2,2 0 0,1 19,20A2,2 0 0,1 17,22C15.89,22 15,21.1 15,20C15,18.89 15.89,18 17,18M1,2H4.27L5.21,4H20A1,1 0 0,1 21,5C21,5.17 20.95,5.34 20.88,5.5L17.3,11.97C16.96,12.58 16.3,13 15.55,13H8.1L7.2,14.63L7.17,14.75A0.25,0.25 0 0,0 7.42,15H19V17H7C5.89,17 5,16.1 5,15C5,14.65 5.09,14.32 5.24,14.04L6.6,11.59L3,4H1V2M7,18A2,2 0 0,1 9,20A2,2 0 0,1 7,22C5.89,22 5,21.1 5,20C5,18.89 5.89,18 7,18M16,11L18.78,6H6.14L8.5,11H16Z"/>
                             </svg>
-                            <span>Купить сейчас</span>
+                            <span>Сразу к оплате 1 ед.</span>
                         </button>
                     </form>
                 </div>
@@ -105,5 +112,4 @@
         </div>
     </div>
 </div>
-</body>
 {% endblock %}
