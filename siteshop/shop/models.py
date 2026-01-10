@@ -316,3 +316,117 @@ class CartItem(models.Model):
 
     def calculate_total_price(self):
         return self.item.price * self.quantity
+
+
+class Order(models.Model):
+    """Модель заказа"""
+
+    STATUS_CHOICES = [
+        ('Unpaid', 'Не оплачен'),
+        ('Paid', 'Оплачен'),
+    ]
+
+    user = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        related_name='orders',
+        verbose_name="Пользователь"
+    )
+
+    stripe_session_id = models.CharField(
+        max_length=255,
+        unique=True,
+        verbose_name="ID сессии Stripe"
+    )
+
+    stripe_payment_intent_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="ID платежа Stripe"
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_CHOICES[0][0],
+        verbose_name="Статус"
+    )
+
+    total_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Общая сумма"
+    )
+
+    currency = models.CharField(
+        max_length=3,
+        choices=CURRENCY_CHOICES,
+        verbose_name="Валюта"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Заказ"
+        verbose_name_plural = "Заказы"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Заказ #{self.id} - {self.user.username}"
+
+
+class OrderItem(models.Model):
+    """Товары в заказе"""
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name="Заказ"
+    )
+
+    item = models.ForeignKey(
+        Item,
+        on_delete=models.PROTECT,
+        verbose_name="Товар"
+    )
+
+    quantity = models.PositiveIntegerField(
+        default=1,
+        verbose_name="Количество"
+    )
+
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Цена за единицу"
+    )
+
+    currency = models.CharField(
+        max_length=3,
+        choices=CURRENCY_CHOICES,
+        verbose_name="Валюта"
+    )
+
+    item_name = models.CharField(
+        max_length=200,
+        verbose_name="Название товара"
+    )
+
+    taxes = models.ManyToManyField(
+        Tax,
+        blank=True,
+        verbose_name="Налоги"
+    )
+
+    def get_total_price(self):
+        return self.price * self.quantity
+
+    class Meta:
+        verbose_name = "Товар в заказе"
+        verbose_name_plural = "Товары в заказе"
+
+    def __str__(self):
+        return f"{self.item_name} x {self.quantity}"

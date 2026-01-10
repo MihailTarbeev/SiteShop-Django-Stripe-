@@ -3,7 +3,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from siteshop import settings
-from .models import CartItem, Item, Cart
+from .models import CartItem, Item, Cart, Order, OrderItem
 from .mixins import UserOwnerMixin
 import stripe
 from rest_framework.decorators import api_view
@@ -103,6 +103,7 @@ class DeletePage(LoginRequiredMixin, UserOwnerMixin, DeleteView):
                      'default_image': settings.DEFAULT_ITEM_IMAGE}
 
 
+@login_required
 def create_session_item(request, item_slug):
     item = get_object_or_404(Item, slug=item_slug, is_available=True)
     taxes = item.taxes.all()
@@ -121,14 +122,30 @@ def create_session_item(request, item_slug):
         }],
         mode='payment',
         success_url=request.build_absolute_uri(
-            reverse('create_session_success')),
+            reverse('create_session_success')
+        ) + '?session_id={CHECKOUT_SESSION_ID}',
     )
 
+    order = Order.objects.create(
+        user=request.user,
+        stripe_session_id=session.id,
+        total_amount=item.price,
+        currency=item.currency,
+        status='Unpaid'
+    )
+
+    order_item = OrderItem.objects.create(
+        order=order,
+        item=item,
+        quantity=1,
+        price=item.price,
+        currency=item.currency,
+        item_name=item.name
+    )
+    if taxes:
+        order_item.taxes.set(taxes)
+
     return redirect(session.url, code=303)
-
-
-def create_session_success(request):
-    return render(request, "shop/success.html")
 
 
 @api_view(['GET'])
@@ -273,38 +290,82 @@ def update_cart_item(request, item_slug):
 
 
 @login_required
+def create_session_success(request):
+    session_id = request.GET.get('session_id')
+
+    if session_id:
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+
+            order = Order.objects.get(
+                stripe_session_id=session.id,
+                user=request.user
+            )
+
+            if session.payment_status == 'paid':
+                order.status = 'Paid'
+                order.save()
+
+                Cart.objects.get(user=request.user).items.all().delete()
+
+            return render(request, 'shop/success.html', {'order': order})
+
+        except Exception as e:
+            return render(request, 'home', {'error': 'Ошибка платежной системы'})
+
+    return render(request, 'shop/success.html')
+
+
+@login_required
 def create_session_cart(request):
     cart = get_object_or_404(Cart, user=request.user)
 
-    if cart.items.count() == 0:
+    if cart.is_empty():
         return redirect('view_cart')
 
     items = cart.items.select_related('item').all()
-    currencies = set(item.item.currency for item in items)
 
+    currencies = set(item.item.currency for item in items)
     if len(currencies) > 1:
         return redirect('view_cart')
 
-    line_items = []
-    for cart_item in items:
-        taxes = cart_item.item.taxes.all()
-        line_items.append({
-            'price_data': {
-                'currency': cart_item.item.currency,
-                'product_data': {
-                    'name': cart_item.item.name,
-                },
-                'unit_amount': int(cart_item.item.price * 100),
-            },
-            'quantity': cart_item.quantity,
-            'tax_rates': [tax.stripe_tax_id for tax in taxes]
-        })
+    currency = items[0].item.currency
 
     session = stripe.checkout.Session.create(
-        line_items=line_items,
+        line_items=[
+            {
+                'price_data': {
+                    'currency': cart_item.item.currency,
+                    'product_data': {'name': cart_item.item.name},
+                    'unit_amount': int(cart_item.item.price * 100),
+                },
+                'quantity': cart_item.quantity,
+                'tax_rates': [tax.stripe_tax_id for tax in cart_item.item.taxes.all()]
+            }
+            for cart_item in items
+        ],
         mode='payment',
         success_url=request.build_absolute_uri(
-            reverse('create_session_success')),
+            reverse('create_session_success')
+        ) + '?session_id={CHECKOUT_SESSION_ID}',
     )
+
+    order = Order.objects.create(
+        user=request.user,
+        stripe_session_id=session.id,
+        total_amount=cart.get_total_price(),
+        currency=currency,
+        status='Unpaid'
+    )
+
+    for cart_item in items:
+        OrderItem.objects.create(
+            order=order,
+            item=cart_item.item,
+            quantity=cart_item.quantity,
+            price=cart_item.item.price,
+            currency=cart_item.item.currency,
+            item_name=cart_item.item.name
+        ).taxes.set(cart_item.item.taxes.all())
 
     return redirect(session.url, code=303)

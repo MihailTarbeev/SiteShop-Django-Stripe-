@@ -1,3 +1,4 @@
+from .models import Item, Category, Tax, Discount, Cart, CartItem, Order, OrderItem
 from django.contrib import admin
 from .models import Item, Category, Tax, Discount, Cart, CartItem
 from django.utils.safestring import mark_safe
@@ -151,3 +152,50 @@ class CartAdmin(admin.ModelAdmin):
 class CartItemAdmin(admin.ModelAdmin):
     list_display = ('cart', 'item', "quantity")
     ordering = ('id',)
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    fields = ('user', 'stripe_session_id', 'stripe_payment_intent_id', 'status',
+              'total_amount', 'currency',
+              'created_at', 'updated_at')
+
+    list_display = ('id', 'user', 'status', 'total_amount', 'currency',
+                    'created_at')
+
+    list_filter = ('status', 'currency', 'created_at')
+
+    search_fields = ('user__username', 'user__email', 'stripe_session_id',
+                     'stripe_payment_intent_id')
+
+    readonly_fields = ('created_at', 'updated_at')
+
+    ordering = ('-created_at',)
+
+
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    fields = ('order', 'item', 'quantity', 'price', 'currency',
+              'item_name', 'taxes', 'get_total_price_display')
+
+    list_display = ('id', 'order', 'item_name', 'quantity', 'price',
+                    'currency', 'get_total_price_display')
+
+    list_filter = ('currency', 'order__status')
+
+    search_fields = ('item_name', 'order__stripe_session_id',
+                     'order__user__username')
+
+    readonly_fields = ('get_total_price_display',)
+
+    ordering = ('-id',)
+
+    @admin.display(description='Общая сумма')
+    def get_total_price_display(self, obj):
+        return f"{obj.get_total_price()} {obj.currency}"
+    get_total_price_display.short_description = "Сумма"
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return [field.name for field in self.model._meta.fields] + ['get_total_price_display']
+        return self.readonly_fields
