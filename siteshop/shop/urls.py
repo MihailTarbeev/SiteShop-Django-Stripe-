@@ -12,7 +12,7 @@ urlpatterns = [
     path('delete_item/<slug:slug>/',
          views.DeletePage.as_view(), name='delete_item'),
     path('buy/item/<slug:item_slug>/',
-         views.create_session, name='create_session'),
+         views.create_session_item, name='create_session'),
     path('create_session_success/',
          views.create_session_success, name='create_session_success'),
     path('api/v1/tax-rates/', views.stripe_tax_rates, name='tax-rates'),
@@ -21,6 +21,7 @@ urlpatterns = [
     path('cart/', views.view_cart, name='view_cart'),
 
     path('cart/clear/', views.clear_cart, name='clear_cart'),
+    path('buy/cart/', views.create_session_cart, name='create_session_cart'),
 
     path('item/<slug:item_slug>/add-to-cart/',
          views.add_to_cart, name='add_to_cart'),

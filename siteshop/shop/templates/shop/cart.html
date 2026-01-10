@@ -111,7 +111,10 @@
             <a href="{% url 'home' %}" class="continue-shopping">Продолжить покупки</a>
             
             {% if not has_multiple_currencies and cart_items %}
-            <button class="checkout-btn" id="checkout-btn">Оформить заказ</button>
+            <form action="{% url 'create_session_cart' %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="checkout-btn" id="checkout-btn">Оформить заказ</button>
+            </form>
             {% elif has_multiple_currencies %}
             <button class="checkout-btn" style="
                 background: #6c757d;

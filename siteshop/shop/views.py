@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from siteshop import settings
@@ -103,7 +103,7 @@ class DeletePage(LoginRequiredMixin, UserOwnerMixin, DeleteView):
                      'default_image': settings.DEFAULT_ITEM_IMAGE}
 
 
-def create_session(request, item_slug):
+def create_session_item(request, item_slug):
     item = get_object_or_404(Item, slug=item_slug, is_available=True)
     taxes = item.taxes.all()
 
@@ -120,7 +120,8 @@ def create_session(request, item_slug):
             'tax_rates': [tax.stripe_tax_id for tax in taxes]
         }],
         mode='payment',
-        success_url='http://127.0.0.1:8000/create_session_success',
+        success_url=request.build_absolute_uri(
+            reverse('create_session_success')),
     )
 
     return redirect(session.url, code=303)
@@ -269,3 +270,41 @@ def update_cart_item(request, item_slug):
                     cart_item.delete()
 
     return redirect('view_cart')
+
+
+@login_required
+def create_session_cart(request):
+    cart = get_object_or_404(Cart, user=request.user)
+
+    if cart.items.count() == 0:
+        return redirect('view_cart')
+
+    items = cart.items.select_related('item').all()
+    currencies = set(item.item.currency for item in items)
+
+    if len(currencies) > 1:
+        return redirect('view_cart')
+
+    line_items = []
+    for cart_item in items:
+        taxes = cart_item.item.taxes.all()
+        line_items.append({
+            'price_data': {
+                'currency': cart_item.item.currency,
+                'product_data': {
+                    'name': cart_item.item.name,
+                },
+                'unit_amount': int(cart_item.item.price * 100),
+            },
+            'quantity': cart_item.quantity,
+            'tax_rates': [tax.stripe_tax_id for tax in taxes]
+        })
+
+    session = stripe.checkout.Session.create(
+        line_items=line_items,
+        mode='payment',
+        success_url=request.build_absolute_uri(
+            reverse('create_session_success')),
+    )
+
+    return redirect(session.url, code=303)
