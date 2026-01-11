@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django import forms
 from .models import Item
 from .utils import MIN_AMOUNTS
@@ -13,6 +14,9 @@ class ItemForm(forms.ModelForm):
         price = self.cleaned_data.get('price')
         currency = self.cleaned_data.get('currency')
         currency_code = currency.code
+        if price is None or currency is None:
+            return self.cleaned_data
+
         if price * 100 < MIN_AMOUNTS[currency_code]:
             raise forms.ValidationError({
                 'price': f'Минимальная стоимость для данной валюты: {MIN_AMOUNTS[currency_code] / 100}'
