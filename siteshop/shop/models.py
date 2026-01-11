@@ -96,11 +96,11 @@ class Item(models.Model):
     name = models.CharField(
         max_length=25, verbose_name="Название товара", validators=[RussianValidator(),])
 
-    price = models.DecimalField(max_digits=15, decimal_places=2, validators=[
+    price = models.DecimalField(max_digits=8, decimal_places=2, validators=[
                                 MinValueValidator(0)], verbose_name="Цена")
 
     description = models.TextField(
-        max_length=150, blank=True, verbose_name="Описание")
+        max_length=300, blank=True, verbose_name="Описание")
 
     owner = models.ForeignKey(get_user_model(),
                               on_delete=models.CASCADE, related_name='items', verbose_name="Владелец")

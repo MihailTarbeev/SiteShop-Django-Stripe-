@@ -174,10 +174,10 @@ def create_session_item(request, item_slug):
             order_item.taxes.set(taxes)
 
         return redirect(session.url, code=303)
-    except Exception:
+    except Exception as e:
         messages.error(
-            request, "Произошла непредвиденная ошибка при создании платежа")
-        return redirect('view_cart')
+            request, f"Произошла непредвиденная ошибка при создании платежа: {e}")
+        return redirect('item', item_slug=item_slug)
 
 
 @api_view(['GET'])
@@ -420,7 +420,7 @@ def create_session_cart(request):
             ).taxes.set(cart_item.item.taxes.all())
 
         return redirect(session.url, code=303)
-    except Exception:
+    except Exception as e:
         messages.error(
-            request, "Произошла непредвиденная ошибка при создании платежа")
+            request, f"Произошла непредвиденная ошибка при создании платежа: {e}")
         return redirect('view_cart')

@@ -5,6 +5,9 @@ from .utils import MIN_AMOUNTS
 
 
 class ItemForm(forms.ModelForm):
+    price = forms.DecimalField(
+        max_digits=8, decimal_places=2, min_value=0, required=True, label='Цена')
+
     class Meta:
         model = Item
         fields = ["image", "name", "price", "currency", "description",
