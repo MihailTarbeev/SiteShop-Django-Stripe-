@@ -216,11 +216,12 @@
 
 <!-- Блок с товарами пользователя -->
 <hr>
-{% if user_items.count > 0 %}
+{% if items.count > 0 %}
   <h3><span>Ваши товары</span></h3> 
 
   <div class="user-items-grid">
-      {% for item in user_items %}
+      {% for item in items %}
+      
       <div class="user-item-card">
           
           {% if item.image %}

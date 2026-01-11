@@ -1,7 +1,7 @@
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView
 from siteshop import settings
-from shop.models import Currency, Order, RankCategory
+from shop.models import Currency, Item, Order, RankCategory
 from .forms import ProfileUserForm, RegisterUserForm, LoginForm
 from django.contrib.auth import get_user_model
 from django.forms.models import model_to_dict
@@ -49,6 +49,10 @@ class ProfileUser(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.get_object()
+
+        user_items = Item.objects.filter(
+            owner=user, is_available=True).select_related('currency')
+        context['items'] = user_items
 
         total_spent = user.get_total_spent()
         current_rank = RankCategory.objects.filter(

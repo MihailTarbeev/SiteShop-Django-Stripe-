@@ -9,7 +9,7 @@
             <p class="auth-subtitle">Создайте новый аккаунт</p>
         </div>
 
-        <form method="post" class="auth-form" novalidate>
+        <form method="post" class="auth-form">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.GET.next }}">
             

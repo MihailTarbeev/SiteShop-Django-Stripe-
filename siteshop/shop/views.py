@@ -1,9 +1,10 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from siteshop import settings
-from .models import CartItem, Item, Cart, Order, OrderItem
+from .models import CartItem, Item, Cart, Order, OrderItem, RankCategory
 from .mixins import UserOwnerMixin
 import stripe
 from rest_framework.decorators import api_view
@@ -15,6 +16,7 @@ import stripe
 from django.conf import settings
 from .forms import ItemForm, AddToCartForm
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 
 class PeopleHome(ListView):
@@ -102,50 +104,80 @@ class DeletePage(LoginRequiredMixin, UserOwnerMixin, DeleteView):
     extra_context = {"title": "Удаление товара",
                      'default_image': settings.DEFAULT_ITEM_IMAGE}
 
+    def form_valid(self, form):
+        item = self.get_object()
+
+        if item.orderitem_set.exists():
+            item.is_available = False
+            item.save()
+
+            messages.success(
+                self.request,
+                f'Товар "{item.name}" деактивирован (скрыт из продажи). '
+                'Он сохранен в системе, так как есть связанные заказы.'
+            )
+        else:
+            return super().form_valid(form)
+
+        return redirect('home')
+
 
 @login_required
 def create_session_item(request, item_slug):
     item = get_object_or_404(Item, slug=item_slug, is_available=True)
     taxes = item.taxes.all()
+    total_spent = request.user.get_total_spent()
+    current_rank = RankCategory.objects.filter(
+        min_total__lte=total_spent
+    ).order_by('-min_total').first()
+    discount = current_rank.discount
+    coupon = discount.stripe_coupon_id if discount.is_active else None
 
-    session = stripe.checkout.Session.create(
-        line_items=[{
-            'price_data': {
-                'currency': item.currency.code,
-                'product_data': {
-                    'name': item.name,
+    try:
+        session = stripe.checkout.Session.create(
+            line_items=[{
+                'price_data': {
+                    'currency': item.currency.code,
+                    'product_data': {
+                        'name': item.name,
+                    },
+                    'unit_amount': int(item.price * 100),
                 },
-                'unit_amount': int(item.price * 100),
-            },
-            'quantity': 1,
-            'tax_rates': [tax.stripe_tax_id for tax in taxes]
-        }],
-        mode='payment',
-        success_url=request.build_absolute_uri(
-            reverse('create_session_success')
-        ) + '?session_id={CHECKOUT_SESSION_ID}',
-    )
+                'quantity': 1,
+                'tax_rates': [tax.stripe_tax_id for tax in taxes]
+            }],
+            mode='payment',
+            success_url=request.build_absolute_uri(
+                reverse('create_session_success')
+            ) + '?session_id={CHECKOUT_SESSION_ID}',
+            discounts=[
+                {'coupon': f"{current_rank.discount.stripe_coupon_id}"}] if coupon else None
+        )
 
-    order = Order.objects.create(
-        user=request.user,
-        stripe_session_id=session.id,
-        total_amount=item.price,
-        currency=item.currency,
-        status='Unpaid'
-    )
+        order = Order.objects.create(
+            user=request.user,
+            stripe_session_id=session.id,
+            total_amount=item.price,
+            currency=item.currency,
+            status='Unpaid'
+        )
 
-    order_item = OrderItem.objects.create(
-        order=order,
-        item=item,
-        quantity=1,
-        price=item.price,
-        currency=item.currency,
-        item_name=item.name
-    )
-    if taxes:
-        order_item.taxes.set(taxes)
+        order_item = OrderItem.objects.create(
+            order=order,
+            item=item,
+            quantity=1,
+            price=item.price,
+            currency=item.currency,
+            item_name=item.name
+        )
+        if taxes:
+            order_item.taxes.set(taxes)
 
-    return redirect(session.url, code=303)
+        return redirect(session.url, code=303)
+    except Exception:
+        messages.error(
+            request, "Произошла непредвиденная ошибка при создании платежа")
+        return redirect('view_cart')
 
 
 @api_view(['GET'])
@@ -218,6 +250,7 @@ def view_cart(request):
         'title': 'Корзина',
         'has_multiple_currencies': len(currencies) > 1,
         'currencies': currencies,
+        "default_image": settings.DEFAULT_ITEM_IMAGE,
     }
 
     return render(request, 'shop/cart.html', context)
@@ -329,43 +362,56 @@ def create_session_cart(request):
     if len(currencies) > 1:
         return redirect('view_cart')
 
+    total_spent = request.user.get_total_spent()
+    current_rank = RankCategory.objects.filter(
+        min_total__lte=total_spent
+    ).order_by('-min_total').first()
+    discount = current_rank.discount
+    coupon = discount.stripe_coupon_id if discount.is_active else None
+
     currency = items[0].item.currency
+    try:
+        session = stripe.checkout.Session.create(
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': cart_item.item.currency.code,
+                        'product_data': {'name': cart_item.item.name},
+                        'unit_amount': int(cart_item.item.price * 100),
+                    },
+                    'quantity': cart_item.quantity,
+                    'tax_rates': [tax.stripe_tax_id for tax in cart_item.item.taxes.all()],
+                }
+                for cart_item in items
+            ],
+            mode='payment',
+            success_url=request.build_absolute_uri(
+                reverse('create_session_success')
+            ) + '?session_id={CHECKOUT_SESSION_ID}',
+            discounts=[
+                {'coupon': f"{current_rank.discount.stripe_coupon_id}"}] if coupon else None
+        )
 
-    session = stripe.checkout.Session.create(
-        line_items=[
-            {
-                'price_data': {
-                    'currency': cart_item.item.currency.code,
-                    'product_data': {'name': cart_item.item.name},
-                    'unit_amount': int(cart_item.item.price * 100),
-                },
-                'quantity': cart_item.quantity,
-                'tax_rates': [tax.stripe_tax_id for tax in cart_item.item.taxes.all()]
-            }
-            for cart_item in items
-        ],
-        mode='payment',
-        success_url=request.build_absolute_uri(
-            reverse('create_session_success')
-        ) + '?session_id={CHECKOUT_SESSION_ID}',
-    )
+        order = Order.objects.create(
+            user=request.user,
+            stripe_session_id=session.id,
+            total_amount=cart.get_total_price(),
+            currency=currency,
+            status='Unpaid'
+        )
 
-    order = Order.objects.create(
-        user=request.user,
-        stripe_session_id=session.id,
-        total_amount=cart.get_total_price(),
-        currency=currency,
-        status='Unpaid'
-    )
+        for cart_item in items:
+            OrderItem.objects.create(
+                order=order,
+                item=cart_item.item,
+                quantity=cart_item.quantity,
+                price=cart_item.item.price,
+                currency=cart_item.item.currency,
+                item_name=cart_item.item.name
+            ).taxes.set(cart_item.item.taxes.all())
 
-    for cart_item in items:
-        OrderItem.objects.create(
-            order=order,
-            item=cart_item.item,
-            quantity=cart_item.quantity,
-            price=cart_item.item.price,
-            currency=cart_item.item.currency,
-            item_name=cart_item.item.name
-        ).taxes.set(cart_item.item.taxes.all())
-
-    return redirect(session.url, code=303)
+        return redirect(session.url, code=303)
+    except Exception:
+        messages.error(
+            request, "Произошла непредвиденная ошибка при создании платежа")
+        return redirect('view_cart')
