@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block "content" %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-success shadow">
+                <div class="card-header bg-success text-white text-center py-4">
+                    <div class="mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                        </svg>
+                    </div>
+                    <h1 class="card-title mb-0">Оплата успешно завершена!</h1>
+                    <p class="lead mb-0">Спасибо за ваш заказ</p>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Информация о заказе -->
+                    {% if payment_intent %}
+                    <div class="order-details mb-5">
+                        <h4 class="mb-3"><i class="bi bi-receipt"></i> Детали платежа</h4>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <td width="40%"><strong>ID транзакции:</strong></td>
+                                        <td class="text-end">
+                                            <code class="bg-light p-1 rounded">{{ payment_intent.id }}</code>
+                                            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="navigator.clipboard.writeText('{{ payment_intent.id }}')">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Дата и время оплаты:</strong></td>
+                                        <td class="text-end">
+                                            {% now "d.m.Y H:i" %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Сумма оплаты:</strong></td>
+                                        <td class="text-end">
+                                            <span class="h5 text-success">{{ amount|floatformat:2 }} {{ currency }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Статус платежа:</strong></td>
+                                        <td class="text-end">
+                                            <span class="badge bg-success rounded-pill">
+                                                {% if payment_intent.status == 'succeeded' %}
+                                                Успешно
+                                                {% else %}
+                                                {{ payment_intent.status }}
+                                                {% endif %}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Валюта:</strong></td>
+                                        <td class="text-end">{{ currency }}</td>
+                                    </tr>
+                                    {% if payment_intent.payment_method %}
+                                    <tr>
+                                        <td><strong>Метод оплаты:</strong></td>
+                                        <td class="text-end">
+                                            {% if payment_intent.payment_method.type == 'card' %}
+                                            <i class="bi bi-credit-card"></i> Карта •••• {{ payment_intent.payment_method.card.last4 }}
+                                            {% else %}
+                                            {{ payment_intent.payment_method.type|title }}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="alert alert-info mt-4">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Информация:</strong> Если у вас есть вопросы по заказу, пожалуйста, свяжитесь с нашей службой поддержки и укажите ID транзакции.
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Действия после оплаты -->
+
+                    
+
+                    <div class="action-buttons mt-5 pt-4 border-top">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a href="{% url 'home' %}" class="btn btn-primary btn-lg px-4 me-md-2">
+                                <i class="bi bi-house-door"></i> Вернуться на главную
+                            </a>
+                            <a href="{% url 'view_cart' %}" class="btn btn-outline-secondary btn-lg px-4">
+                                <i class="bi bi-cart"></i> Перейти в корзину
+                            </a>
+                            <a href="#" onclick="window.print()" class="btn btn-outline-info btn-lg px-4 ms-md-2">
+                                <i class="bi bi-printer"></i> Распечатать чек
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+// Автоматически прокрутить страницу вверх при загрузке
+window.onload = function() {
+    window.scrollTo(0, 0);
+    
+    // Добавить небольшую анимацию
+    const successIcon = document.querySelector('.bi-check-circle-fill');
+    if (successIcon) {
+        successIcon.style.transition = 'transform 0.5s ease';
+        successIcon.style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            successIcon.style.transform = 'scale(1)';
+        }, 500);
+    }
+};
+
+// Копирование ID транзакции
+function copyTransactionId() {
+    const id = '{{ payment_intent.id }}';
+    navigator.clipboard.writeText(id).then(() => {
+        // Показать уведомление о копировании
+        const button = event.target.closest('button');
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-check"></i> Скопировано!';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalHtml;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+}
+
+// Добавить обработчик на кнопку копирования
+document.addEventListener('DOMContentLoaded', function() {
+    const copyButton = document.querySelector('button[onclick*="clipboard.writeText"]');
+    if (copyButton) {
+        copyButton.setAttribute('onclick', 'copyTransactionId()');
+    }
+});
+</script>
+
+<style>
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.bi-check-circle-fill {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.order-details table tr td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.order-details table tr:last-child td {
+    border-bottom: none;
+}
+
+.table-responsive {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #dee2e6;
+}
+
+.action-buttons .btn {
+    min-width: 180px;
+}
+
+@media (max-width: 768px) {
+    .action-buttons .btn {
+        min-width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .action-buttons .d-md-flex {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
@@ -238,14 +238,17 @@ def stripe_coupons(request):
 def view_cart(request):
     cart, created = Cart.objects.get_or_create(user=request.user)
     cart_items = cart.items.select_related('item').all()
-    total_price = cart.get_total_price()
-    currencies = set(cart_item.item.currency for cart_item in cart_items)
+    total_price_without_taxes = cart.get_total_price()
+    tax_amount = cart.get_tax_amount()
     total_quantity = cart.get_total_quantity()
+
+    currencies = set(cart_item.item.currency for cart_item in cart_items)
 
     context = {
         'cart': cart,
         'cart_items': cart_items,
-        "total_price": total_price,
+        "total_price": total_price_without_taxes,
+        "tax_amount": tax_amount,
         "total_quantity": total_quantity,
         'title': 'Корзина',
         'has_multiple_currencies': len(currencies) > 1,
@@ -423,4 +426,177 @@ def create_session_cart(request):
     except Exception as e:
         messages.error(
             request, f"Произошла непредвиденная ошибка при создании платежа: {e}")
+        return redirect('view_cart')
+
+
+@login_required
+def payment_intent_success(request):
+    """Страница успешной оплаты через PaymentIntent"""
+    payment_intent_id = request.GET.get('payment_intent')
+
+    if not payment_intent_id:
+        messages.warning(request, "Не указан идентификатор платежа")
+        return redirect('view_cart')
+
+    try:
+        payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+
+        if payment_intent.status == 'succeeded':
+            try:
+                order = Order.objects.get(
+                    stripe_payment_intent_id=payment_intent_id)
+                order.status = 'Paid'
+                order.save()
+
+                Cart.objects.filter(user=request.user).delete()
+
+                messages.success(
+                    request, f"Заказ #{order.id} успешно оплачен!")
+
+            except Order.DoesNotExist:
+                messages.warning(request, "Заказ не найден в системе")
+            except Cart.DoesNotExist:
+                pass
+
+        return render(request, 'shop/payment_success.html', {
+            'title': 'Оплата успешна',
+            'payment_intent': payment_intent,
+            'amount': payment_intent.amount / 100,
+            'currency': payment_intent.currency.upper(),
+        })
+
+    except stripe.error.InvalidRequestError:
+        messages.error(request, "Неверный идентификатор платежа")
+        return redirect('view_cart')
+    except Exception as e:
+        messages.error(request, f"Ошибка при обработке платежа: {str(e)}")
+        return redirect('view_cart')
+
+
+@login_required
+def payment_intent(request):
+    """Payment Intent"""
+    try:
+        cart = get_object_or_404(Cart, user=request.user)
+
+        if cart.is_empty():
+            messages.info(request, "Корзина пуста")
+            return redirect('view_cart')
+
+        cart_items = cart.items.select_related('item', 'item__currency').all()
+
+        currencies = set(item.item.currency for item in cart_items)
+        if len(currencies) > 1:
+            messages.error(request, "Товары в разных валютах")
+            return redirect('view_cart')
+
+        currency = cart_items[0].item.currency
+
+        item_details = []
+        base_price_total = 0
+        tax_amount_total = 0
+
+        for cart_item in cart_items:
+            item = cart_item.item
+            quantity = cart_item.quantity
+            item_base_price = item.price * quantity
+            base_price_total += item_base_price
+
+            taxes = item.taxes.all()
+            item_tax = 0
+            if taxes.exists():
+                for tax in taxes:
+                    if not tax.inclusive:
+                        item_tax += item_base_price * (tax.percentage / 100)
+                tax_amount_total += item_tax
+
+            item_details.append({
+                'name': item.name,
+                'quantity': quantity,
+                'price': item.price,
+                'total': item_base_price,
+                'taxes': taxes,
+                'tax_amount': item_tax,
+                'image': item.image,
+                'slug': item.slug,
+            })
+
+        total_amount = base_price_total + tax_amount_total
+
+        total_spent = request.user.get_total_spent()
+        current_rank = RankCategory.objects.filter(
+            min_total__lte=total_spent
+        ).order_by('-min_total').first()
+
+        discount_amount = 0
+        discount_percent = 0
+        rank_name = None
+
+        if current_rank and current_rank.discount and current_rank.discount.is_active:
+            rank_name = current_rank.name
+            if current_rank.discount.percent_off:
+                discount_percent = current_rank.discount.percent_off
+                discount_amount = total_amount * (discount_percent / 100)
+                total_amount -= discount_amount
+            elif current_rank.discount.amount_off:
+                discount_amount = current_rank.discount.amount_off
+                total_amount -= discount_amount
+
+        payment_intent = stripe.PaymentIntent.create(
+            amount=int(total_amount * 100),
+            currency=currency.code.lower(),
+            automatic_payment_methods={"enabled": True},
+            metadata={
+                "user_id": str(request.user.id),
+                "items_count": str(len(cart_items)),
+                "base_price": str(base_price_total),
+                "tax_amount": str(tax_amount_total),
+                "discount": str(discount_amount),
+                "rank": rank_name or "none",
+            }
+        )
+
+        order = Order.objects.create(
+            user=request.user,
+            stripe_payment_intent_id=payment_intent.id,
+            total_amount=total_amount,
+            currency=currency,
+            status='Unpaid'
+        )
+
+        for cart_item in cart_items:
+            order_item = OrderItem.objects.create(
+                order=order,
+                item=cart_item.item,
+                quantity=cart_item.quantity,
+                price=cart_item.item.price,
+                currency=cart_item.item.currency,
+                item_name=cart_item.item.name
+            )
+            if cart_item.item.taxes.exists():
+                order_item.taxes.set(cart_item.item.taxes.all())
+
+        return render(request, 'shop/payment_intent.html', {
+            'title': 'Оплата заказа',
+            'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
+            'client_secret': payment_intent.client_secret,
+            'payment_intent_id': payment_intent.id,
+            'order_id': order.id,
+            'items': item_details,
+            'items_count': len(cart_items),
+            'base_price_total': base_price_total,
+            'tax_amount_total': tax_amount_total,
+            'discount_amount': discount_amount,
+            'discount_percent': discount_percent,
+            'total_amount': total_amount,
+            'currency': currency.symbol,
+            'rank_name': rank_name,
+            'default_image': settings.DEFAULT_ITEM_IMAGE,
+        })
+
+    except Exception as e:
+        import traceback
+        print(f"ERROR: {str(e)}")
+        print(traceback.format_exc())
+        messages.error(request, f"Ошибка: {str(e)}")
         return redirect('view_cart')

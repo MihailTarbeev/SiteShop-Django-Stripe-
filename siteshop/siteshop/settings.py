@@ -149,3 +149,5 @@ LOGOUT_REDIRECT_URL = "home"
 LOGIN_URL = "users:login"
 
 stripe.api_key = os.environ.get("STRIPE_API_SECRET_KEY")
+
+STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY")

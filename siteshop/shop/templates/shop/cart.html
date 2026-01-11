@@ -123,10 +123,22 @@
             <a href="{% url 'home' %}" class="continue-shopping">Продолжить покупки</a>
             
             {% if not has_multiple_currencies and cart_items %}
-            <form action="{% url 'create_session_cart' %}" method="POST">
-            {% csrf_token %}
-            <button type="submit" class="checkout-btn" id="checkout-btn">Оформить заказ</button>
-            </form>
+            <div class="cart-actions">
+                <form action="{% url 'create_session_cart' %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="checkout-btn">
+                        <i class="bi bi-credit-card"></i> Оплатить через Stripe Checkout
+                    </button>
+                </form>
+
+                <form action="{% url 'create_payment_intent_cart' %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="checkout-btn" style="background-color: #6772e5;">
+                        <i class="bi bi-credit-card-fill"></i> Оплатить через Payment Intent
+                    </button>
+                </form>
+            </div>
+            
             {% elif has_multiple_currencies %}
             <button class="checkout-btn" style="
                 background: #6c757d;

@@ -1,0 +1,284 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    
+    <link rel="stylesheet" href="{% static 'shop/css/payment_intent.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💳 Оплата заказа</h1>
+            <p>Заказ #{{ order_id }}</p>
+        </div>
+
+        <!-- Отладочная информация -->
+        {% comment %} <div class="debug-info">
+            <strong>Отладочные данные:</strong>
+            • Товаров: {{ items_count }} шт.<br>
+            • Базовая сумма: {{ base_price_total|floatformat:2 }} {{ currency }}<br>
+            {% if tax_amount_total %}
+            • Налоги: +{{ tax_amount_total|floatformat:2 }} {{ currency }}<br>
+            {% endif %}
+            {% if discount_amount %}
+            • Скидка: -{{ discount_amount|floatformat:2 }} {{ currency }}<br>
+            {% endif %}
+            • <strong>Итого: {{ total_amount|floatformat:2 }} {{ currency }}</strong><br>
+            • Stripe Key: {{ stripe_public_key|slice:":20" }}...<br>
+            • PaymentIntent: {{ payment_intent_id }}
+        </div> {% endcomment %}
+
+
+        <div class="order-card">
+            <div class="card-section">
+                <div class="section-title">📦 Детали заказа</div>
+                
+                {% for item in items %}
+                <div class="order-item">
+                    <div class="item-image">
+                        {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                        {% else %}
+                        <img src="{{ default_image }}" alt="Нет изображения">
+                        {% endif %}
+                    </div>
+                    
+                    <div class="item-details">
+                        <div class="item-name">{{ item.name }}</div>
+                        
+                        <div class="item-meta">
+                            <div class="item-quantity">
+                                Кол-во {{ item.quantity }}<br>
+                                <small>{{ item.price|floatformat:2 }} {{ currency }} шт.</small>
+                            </div>
+                            <div class="item-total">{{ item.total|floatformat:2 }} {{ currency }}</div>
+                        </div>
+                        
+                        {% if item.taxes %}
+                        <div style="margin-top: 5px; font-size: 12px; color: #666;">
+                            {% for tax in item.taxes %}
+                            <span>{{ tax.display_name }} ({{ tax.percentage }}%)</span>
+                            {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="card-section">
+                <div class="section-title">💰 Итоговая сумма</div>
+                
+                <div class="summary-grid">
+                    <div class="summary-row">
+                        <span class="summary-label">Подытог ({{ items_count }} шт.)</span>
+                        <span class="summary-value">{{ base_price_total|floatformat:2 }} {{ currency }}</span>
+                    </div>
+                    
+                    {% if tax_amount_total %}
+                    <div class="summary-row tax-row">
+                        <span class="summary-label">Налоги</span>
+                        <span class="summary-value">+{{ tax_amount_total|floatformat:2 }} {{ currency }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if discount_amount %}
+                    <div class="summary-row discount-row">
+                        <span class="summary-label">
+                            {% if rank_name %}
+                            Купон для {{ rank_name }}
+                            {% else %}
+                            Скидка
+                            {% endif %}
+                            {% if discount_percent %}
+                            ({{ discount_percent }}%)
+                            {% endif %}
+                        </span>
+                        <span class="summary-value">-{{ discount_amount|floatformat:2 }} {{ currency }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="summary-row" style="border-top: 2px solid #ddd; margin-top: 10px; padding-top: 15px;">
+                        <span class="summary-label" style="font-size: 18px; font-weight: 600;">Всего к оплате</span>
+                        <span class="summary-total">{{ total_amount|floatformat:2 }} {{ currency }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-section">
+                <div class="section-title">💳 Данные для оплаты</div>
+                
+                <div class="payment-form">
+                    <div id="card-element">
+                        <div id="loading">
+                            <div class="spinner"></div>
+                            <p>Загрузка платежной формы...</p>
+                        </div>
+                    </div>
+                    
+                    <div id="card-errors"></div>
+                    
+                    <button id="submit-button" class="pay-button" disabled>
+                        Оплатить {{ total_amount|floatformat:2 }} {{ currency }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-section">
+                <details class="test-cards">
+                    <summary>Тестовые карты для проверки</summary>
+                    <ul>
+                        <li><code>4242 4242 4242 4242</code> - успешный платеж</li>
+                        <li><code>4000 0000 0000 9995</code> - недостаточно средств</li>
+                        <li><code>4000 0027 6000 3184</code> - требуется аутентификация</li>
+                    </ul>
+                </details>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="{% url 'view_cart' %}" class="btn btn-secondary">← Вернуться в корзину</a>
+            <a href="{% url 'home' %}" class="btn btn-primary">На главную</a>
+        </div>
+    </div>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('=== ИНИЦИАЛИЗАЦИЯ ПЛАТЕЖА ===');
+        
+        function waitForStripe() {
+            return new Promise((resolve, reject) => {
+                let attempts = 0;
+                const maxAttempts = 30;
+                
+                function check() {
+                    attempts++;
+                    if (typeof Stripe !== 'undefined') {
+                        resolve();
+                    } else if (attempts >= maxAttempts) {
+                        reject(new Error('Stripe.js не загрузился'));
+                    } else {
+                        setTimeout(check, 100);
+                    }
+                }
+                check();
+            });
+        }
+        
+        async function initializePayment() {
+            try {
+                console.log('1. Проверяем Stripe.js...');
+                await waitForStripe();
+                console.log('✅ Stripe.js загружен');
+                
+                const publicKey = '{{ stripe_public_key }}';
+                if (!publicKey || publicKey.includes('None')) {
+                    throw new Error('Не настроен публичный ключ Stripe');
+                }
+                
+                console.log('2. Инициализируем Stripe...');
+                const stripe = Stripe(publicKey);
+                
+                console.log('3. Создаем форму...');
+                const elements = stripe.elements();
+                const cardElement = elements.create('card', {
+                    style: {
+                        base: {
+                            fontSize: '16px',
+                            color: '#32325d',
+                            fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+                            '::placeholder': {
+                                color: '#aab7c4'
+                            }
+                        }
+                    }
+                });
+                
+
+                document.getElementById('loading').style.display = 'none';
+                cardElement.mount('#card-element');
+                
+                const submitButton = document.getElementById('submit-button');
+                submitButton.disabled = false;
+                
+                cardElement.addEventListener('change', function(event) {
+                    const errorDiv = document.getElementById('card-errors');
+                    if (event.error) {
+                        errorDiv.textContent = event.error.message;
+                        errorDiv.style.display = 'block';
+                    } else {
+                        errorDiv.style.display = 'none';
+                    }
+                });
+                
+
+                submitButton.addEventListener('click', async function() {
+                    const button = this;
+                    const originalText = button.textContent;
+                    
+                    button.disabled = true;
+                    button.textContent = 'Обработка...';
+                    
+
+                    document.getElementById('card-errors').style.display = 'none';
+                    
+                    try {
+                        console.log('Начинаем оплату...');
+                        
+                        const result = await stripe.confirmCardPayment('{{ client_secret }}', {
+                            payment_method: {
+                                card: cardElement,
+                                billing_details: {
+                                    name: '{{ user.get_full_name|default:user.username }}'
+                                }
+                            }
+                        });
+                        
+                        console.log('Результат:', result);
+                        
+                        if (result.error) {
+                            const errorDiv = document.getElementById('card-errors');
+                            errorDiv.textContent = '❌ ' + result.error.message;
+                            errorDiv.style.display = 'block';
+                            button.disabled = false;
+                            button.textContent = originalText;
+                        } else {
+                            button.textContent = '✅ Успешно!';
+                            setTimeout(() => {
+                                window.location.href = "{% url 'payment_intent_success' %}?payment_intent={{ payment_intent_id }}";
+                            }, 1500);
+                        }
+                    } catch (error) {
+                        console.error('Ошибка:', error);
+                        const errorDiv = document.getElementById('card-errors');
+                        errorDiv.textContent = '❌ ' + error.message;
+                        errorDiv.style.display = 'block';
+                        button.disabled = false;
+                        button.textContent = originalText;
+                    }
+                });
+                
+                
+            } catch (error) {
+                document.getElementById('loading').innerHTML = 
+                    '<div style="color: #dc3545; text-align: center;">' +
+                    '<p><strong>❌ Ошибка загрузки платежной системы</strong></p>' +
+                    '<p>' + error.message + '</p>' +
+                    '<p><small>Отключите AdBlock и обновите страницу</small></p>' +
+                    '</div>';
+            }
+        }
+        
+
+        initializePayment();
+    });
+    </script>
+</body>
+</html>

@@ -298,9 +298,24 @@ class Cart(models.Model):
         return f"Корзина {self.user.username}"
 
     def get_total_price(self):
+        """Сумма без налогов"""
         total = 0
         for cart_item in self.items.all():
             total += cart_item.calculate_total_price()
+        return total
+
+    def get_total_price_with_taxes(self):
+        """Сумма с налогами"""
+        total = 0
+        for cart_item in self.items.all():
+            total += cart_item.calculate_total_price_with_taxes()
+        return total
+
+    def get_tax_amount(self):
+        """Общая сумма налогов в корзине"""
+        total = 0
+        for cart_item in self.items.all():
+            total += cart_item.get_tax_amount()
         return total
 
     def get_total_quantity(self):
@@ -326,7 +341,30 @@ class CartItem(models.Model):
         return f"{self.cart.user.username} {self.item.name}"
 
     def calculate_total_price(self):
+        """Цена без налогов"""
         return self.item.price * self.quantity
+
+    def calculate_total_price_with_taxes(self):
+        """Цена с налогами"""
+        base_price = self.calculate_total_price()
+        total_tax = 0
+
+        for tax in self.item.taxes.all():
+            if not tax.inclusive:
+                total_tax += base_price * (tax.percentage / 100)
+
+        return base_price + total_tax
+
+    def get_tax_amount(self):
+        """Сумма налогов для этого товара"""
+        base_price = self.calculate_total_price()
+        total_tax = 0
+
+        for tax in self.item.taxes.all():
+            if not tax.inclusive:
+                total_tax += base_price * (tax.percentage / 100)
+
+        return total_tax
 
 
 class Order(models.Model):
@@ -346,6 +384,8 @@ class Order(models.Model):
 
     stripe_session_id = models.CharField(
         max_length=255,
+        blank=True,
+        null=True,
         unique=True,
         verbose_name="ID сессии Stripe"
     )
@@ -354,6 +394,7 @@ class Order(models.Model):
         max_length=255,
         blank=True,
         null=True,
+        unique=True,
         verbose_name="ID платежа Stripe"
     )
 

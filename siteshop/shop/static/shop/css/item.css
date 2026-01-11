@@ -130,7 +130,7 @@
     
     .edit-btn {
         background: #3498db;
-        color: white;
+        color: white !important;
     }
     
     .edit-btn:hover {
