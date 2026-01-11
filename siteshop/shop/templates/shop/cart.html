@@ -61,7 +61,7 @@
             </div>
             
             <div class="cart-item-info">
-                <h3 class="cart-item-title">{{ cart_item.item.name }}</h3>
+                <h3 class="cart-item-title"><a href="{{ cart_item.item.get_absolute_url }}">{{ cart_item.item.name }}</a></h3>
                 <p class="cart-item-price">{{ cart_item.item.price }} {{ cart_item.item.currency.symbol }}</p>
                 
                 <div class="cart-item-quantity">

@@ -362,6 +362,15 @@ def create_session_cart(request):
     if len(currencies) > 1:
         return redirect('view_cart')
 
+    unavailable_items = items.filter(item__is_available=False)
+    if unavailable_items.exists():
+        item_names = [item.item.name for item in unavailable_items]
+        messages.error(
+            request,
+            f"Следующие товары больше не доступны: {', '.join(item_names)}"
+        )
+        return redirect('view_cart')
+
     total_spent = request.user.get_total_spent()
     current_rank = RankCategory.objects.filter(
         min_total__lte=total_spent
