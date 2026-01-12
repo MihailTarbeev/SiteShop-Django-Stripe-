@@ -569,7 +569,7 @@
     "pk": 1,
     "fields": {
       "code": "rub",
-      "symbol": "R",
+      "symbol": "₽",
       "name": "Рубль",
       "rate_to_rub": "1.00",
       "min_amount": "50.00",
@@ -582,7 +582,7 @@
     "pk": 2,
     "fields": {
       "code": "usd",
-      "symbol": "S",
+      "symbol": "$",
       "name": "Доллар",
       "rate_to_rub": "78.00",
       "min_amount": "0.50",
@@ -595,7 +595,7 @@
     "pk": 3,
     "fields": {
       "code": "eur",
-      "symbol": "E",
+      "symbol": "€",
       "name": "Евро",
       "rate_to_rub": "92.00",
       "min_amount": "0.50",
