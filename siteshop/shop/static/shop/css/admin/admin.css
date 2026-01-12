@@ -1,0 +1,103 @@
+/* Минималистичный новогодний дизайн для админ-панели */
+:root {
+    --newyear-red: #d32f2f;
+    --newyear-green: #388e3c;
+    --newyear-gold: #ffb300;
+    --newyear-light: #fafafa;
+}
+
+
+#header {
+    background: linear-gradient(90deg, var(--newyear-red), var(--newyear-green));
+    border-bottom: 2px solid var(--newyear-gold);
+}
+
+#site-name a {
+    color: white !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+h1 {
+    color: var(--newyear-red) !important;
+    font-weight: 600;
+    margin-bottom: 25px !important;
+    position: relative;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+h1::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--newyear-red), var(--newyear-gold), var(--newyear-green));
+}
+
+.module {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 20px !important;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.module:hover {
+    border-color: var(--newyear-green);
+    box-shadow: 0 2px 8px rgba(56, 142, 60, 0.1);
+}
+
+.module caption {
+    background: linear-gradient(135deg, var(--newyear-green), #2e7d32);
+    color: white !important;
+    padding: 12px 15px !important;
+    font-weight: 500;
+}
+
+.module tr {
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.module tr:hover {
+    background-color: rgba(255, 179, 0, 0.05) !important;
+}
+
+.module th a {
+    color: var(--newyear-green) !important;
+    font-weight: 500;
+}
+
+
+.model-currency::before { content: "💰 "; }
+.model-order::before { content: "📦 "; }
+.model-category::before { content: "🏷️ "; }
+.model-rankcategory::before { content: "⭐ "; }
+.model-cart::before { content: "🛒 "; }
+.model-discount::before { content: "🎫 "; }
+.model-tax::before { content: "💳 "; }
+.model-item::before { content: "🎁 "; }
+.model-orderitem::before, .model-cartitem::before { content: "📋 "; }
+.model-user::before { content: "👤 "; }
+.model-group::before { content: "👥 "; }
+
+.module th {
+    position: relative;
+    padding-left: 25px !important;
+}
+
+.module th::before {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+}
+
+
+.breadcrumbs, #changelist-filter-header {
+   background-color: var(--newyear-green) !important;
+}

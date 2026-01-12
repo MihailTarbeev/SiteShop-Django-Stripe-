@@ -375,6 +375,13 @@ command: >
       <b>📝 Регистрация нового пользователя</b>
     </td>
   </tr>
+  <tr>
+    <td align="center" valign="top">
+      <img src="./siteshop/media/for_readme/admin.png" width="100%">
+      <br>
+      <b>❄️Кастомная админка❄️</b>
+    </td>
+  </tr>
 </table>
 
 
