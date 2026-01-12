@@ -76,14 +76,6 @@ docker compose up --build
 <a id="stripe"></a>
 ## 💳 Реализация платёжной системы STRIPE
 
-
-<div style="float: right; width: 500px; margin-left: 20px;">
-  <img src="./siteshop/media/for_readme/session_pay2.png" width="450" style="display: block; margin-bottom: 20px;">
-  <img src="./siteshop/media/for_readme/session_pay.png" width="400" style="display: block; margin-bottom: 20px;;">
-  <img src="./siteshop/media/for_readme/PI_pay.png" width="400" style="display: block;">
-</div>
-
-
 Проект реализует полноценную интеграцию с платёжной системой Stripe - современным решением для онлайн-платежей с детализированным API и бесплатным тестовым режимом. С помощью Python библиотеки stripe реализованы различные сценарии платежей, от простых однотоварных покупок до многотоварных заказов с налогами и скидками.
 
 В рамках проекта реализованы два варианта проведения платежа, каждый из которых подходит для разных сценариев использования.
@@ -102,8 +94,10 @@ docker compose up --build
 4. После оплаты пользователь возвращается на сайт
 
 **Endpoint:** `http://127.0.0.1:8000/buy/cart/`
-
-
+<div align="center">
+<img src="./siteshop/media/for_readme/session_pay2.png" width="650" style="display: block; margin-bottom: 20px;">
+<img src="./siteshop/media/for_readme/session_pay.png" width="650" style="display: block; margin-bottom: 20px; margin-left: 120px;">
+</div>
 
 **Пример создания сессии:**
 ```python
@@ -136,6 +130,10 @@ session = stripe.checkout.Session.create(
 
 **Endpoint:** `http://127.0.0.1:8000/buy/payment-intent/`
 
+<div align="center">
+<img src="./siteshop/media/for_readme/PI_pay.png" width="400" style="display: block;">
+</div>
+  
 **Пример создания Payment Intent:**
 ```python
 payment_intent = stripe.PaymentIntent.create(
@@ -155,6 +153,7 @@ payment_intent = stripe.PaymentIntent.create(
 <a id="структура-базы-данных"></a>
 ## 🗄️ Структура таблиц базы данных
 Ниже представлена структура таблиц базы данных, которая используется в проекте.
+
 <div align="center">
 <img src="./siteshop/media/for_readme/db.png" width="800"/>
 </div>
@@ -178,14 +177,13 @@ payment_intent = stripe.PaymentIntent.create(
 <a id="система-скидок"></a>
 ## 💰 Система скидок
 
-<div align="center">
-<p><img src="./siteshop/media/for_readme/rangs.png" width="680" style="float: right; margin-bottom: 20px;"/></p>
-<p><img src="./siteshop/media/for_readme/rang_profile.png" width="500" style="float: right; margin-left: 20px;"/></p>
-</div>
-
 На сайте реализована система скидок на основе рангов пользователей. Система автоматически рассчитывает скидку в зависимости от общей суммы, в рублях, потраченной пользователем.
 
 **🏆 11 уровней рангов**
+
+<div align="center">
+<p><img src="./siteshop/media/for_readme/rangs.png" width="1000" style="float: right; margin-bottom: 20px;"/></p>
+</div>
 
 **Модели:**
 - **Discount** - купоны Stripe с настройками срока действия
@@ -225,6 +223,11 @@ def convert_amount_to_rubles(cls, amount, currency_code):
 ```
 
 - 📊 Отображение прогресса до следующего ранга в профиле
+
+<div align="center">
+<p><img src="./siteshop/media/for_readme/rang_profile.png" width="500" style="float: right; margin-bottom: 20px;"/></p>
+</div>
+
 - 🎫 Автоматическое применение купона при оформлении заказа
 - 🔄 Синхронизация купонов между Django и Stripe
 
