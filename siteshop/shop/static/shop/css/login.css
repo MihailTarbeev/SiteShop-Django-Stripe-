@@ -113,3 +113,7 @@
 .link:hover {
     text-decoration: underline;
 }
+
+.field-error {
+    color:rgb(255, 0, 0);
+}

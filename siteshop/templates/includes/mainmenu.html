@@ -16,9 +16,9 @@
 
 
                 {% if title == "Профиль пользователя" %}
-                <li><a class="selected">Профиль | {{ user.username }}</a></li>
+                <li><a class="selected">Профиль | {{ user.first_name }}</a></li>
                 {% else %}
-                <li><a href="{% url "users:profile" %}">Профиль | {{ user.username }}</a></li>
+                <li><a href="{% url "users:profile" %}">Профиль | {{ user.first_name }}</a></li>
                 {% endif %}
 
 
