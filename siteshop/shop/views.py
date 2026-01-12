@@ -450,9 +450,6 @@ def payment_intent_success(request):
 
                 Cart.objects.filter(user=request.user).delete()
 
-                messages.success(
-                    request, f"Заказ #{order.id} успешно оплачен!")
-
             except Order.DoesNotExist:
                 messages.warning(request, "Заказ не найден в системе")
             except Cart.DoesNotExist:

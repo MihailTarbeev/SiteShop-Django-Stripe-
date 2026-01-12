@@ -163,11 +163,26 @@
         transform: scale(1.1);
     }
     
-    .item-description-section {
-        margin: 40px 0;
-        padding-top: 30px;
-        border-top: 1px solid #eee;
-    }
+    .item-description {
+    color: #34495e;
+    font-size: 16px;
+    line-height: 1.7;
+    /* Просто нормальный поток текста */
+    white-space: normal;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid #e0e0e0;
+}
+
+/* И дописать для правильного отображения параграфов */
+.item-description p {
+    margin: 0 0 15px 0;
+}
+
+.item-description p:last-child {
+    margin-bottom: 0;
+}
     
     .section-title {
         margin: 0 0 20px 0;
@@ -773,4 +788,64 @@
 
 .go-to-cart-btn .cart-icon {
     fill: white;
+}
+
+
+#item-detail-page .item-description-section .item-description {
+    white-space: normal !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* Если есть inline-стили, переопределим их */
+.item-detail-card .item-description {
+    white-space: normal !important;
+    max-height: none !important;
+    overflow: visible !important;
+    min-height: auto !important;
+    height: auto !important;
+}
+
+/* Дополнительно убедимся, что контейнер не ограничивает высоту */
+#item-detail-page .item-description-section {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+}
+
+/* Если проблема в гриде */
+.item-header {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+@media (min-width: 768px) {
+    .item-header {
+        flex-direction: row !important;
+    }
+}
+
+/* Явно задаем высоту для изображения, если оно тянет за собой */
+.item-image-container {
+    height: auto !important;
+    max-height: 400px !important;
+    overflow: hidden !important;
+}
+
+.item-main-image {
+    height: auto !important;
+    max-height: 400px !important;
+    object-fit: contain !important;
+}
+
+/* Делаем описание нормальным текстом */
+.item-description p {
+    margin: 0 0 1em 0 !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+.item-description br {
+    display: inline !important;
 }

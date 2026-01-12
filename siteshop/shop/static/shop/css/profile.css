@@ -699,3 +699,66 @@
         grid-template-columns: 1fr;
     }
 }
+
+
+/* Добавьте это в конец вашего profile.css файла */
+
+/* Исправляем описание товаров в профиле */
+.user-item-card .item-description {
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    max-height: 4.2em !important; /* 3 строки * 1.4 line-height */
+    line-height: 1.4 !important;
+    position: relative !important;
+    padding-right: 0 !important;
+}
+
+/* Убираем лишние отступы и переносы */
+.user-item-card .item-description br {
+    display: none !important;
+}
+
+/* Исправляем для многострочного текста */
+.user-item-card .item-content {
+    min-height: 100px !important; /* Минимальная высота для консистентности */
+}
+
+/* Убедимся, что контейнеры не растягиваются */
+.user-item-card {
+    height: 350px !important; /* Фиксированная высота карточки */
+    overflow: hidden !important;
+}
+
+/* Исправляем для Firefox */
+@supports (-moz-appearance:none) {
+    .user-item-card .item-description {
+        display: -moz-box !important;
+        -moz-box-orient: vertical !important;
+        -moz-line-clamp: 3 !important;
+        overflow: hidden !important;
+    }
+}
+
+/* Альтернативный вариант: убираем обрезку совсем, если нужно */
+/*
+.user-item-card .item-description {
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+}
+*/
+
+/* Если всё ещё проблема, можно так: */
+.user-item-card .item-description {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    line-height: 1.4em;
+    max-height: 4.2em; /* 3 * 1.4 */
+}

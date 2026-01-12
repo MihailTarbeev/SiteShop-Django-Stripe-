@@ -14,3 +14,4 @@ venv/
 siteshop/media/*
 !siteshop/media/users/default.jpg
 !siteshop/media/shop/default.jpg
+!siteshop/media/for_readme
