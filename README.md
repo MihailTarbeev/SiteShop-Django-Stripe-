@@ -44,7 +44,7 @@
 ```bash
 # Клонировать репозиторий
 git clone https://github.com/MihailTarbeev/SiteShop-Django-Stripe-.git
-cd SiteShop-Django-Stripe
+cd SiteShop-Django-Stripe-
 
 # Запустить все сервисы
 docker compose up --build
