@@ -1,0 +1,606 @@
+[
+  {
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$5wf67HKxGi3TzagI5iW08s$4GrO41zpR9KMsBRNxJfNwQjht+GANp1CMzQ+FI0pAn4=",
+      "last_login": "2026-01-12T14:16:12.164Z",
+      "is_superuser": true,
+      "username": "root",
+      "email": "tarb3@yandex.ru",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-01-07T05:17:39.514Z",
+      "photo": "",
+      "first_name": "Михаил",
+      "last_name": "Михайлов",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$8IbbyAcJOpLdfJwmwRAOnJ$BghUodRTBWyZv7ZeNRtdywBcbKiEtzhiMz2JFdsKjvE=",
+      "last_login": "2026-01-11T07:09:55.347Z",
+      "is_superuser": false,
+      "username": "user",
+      "email": "user@test.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-01-11T07:08:57.704Z",
+      "photo": "",
+      "first_name": "Петр",
+      "last_name": "Петров",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "shop.tax",
+    "pk": 22,
+    "fields": {
+      "display_name": "НДС",
+      "percentage": "20.00",
+      "stripe_tax_id": "txr_1SnfibKpfYmXuwNDr88zDJnz",
+      "inclusive": false,
+      "active": true,
+      "country": null,
+      "description": "Стандартный налог на товары в России/Европе. Большинство физических товаров облагаются НДС.",
+      "jurisdiction": null,
+      "state": null,
+      "created_at": "2026-01-09T13:27:06.963Z",
+      "updated_at": "2026-01-09T13:27:06.963Z"
+    }
+  },
+  {
+    "model": "shop.tax",
+    "pk": 23,
+    "fields": {
+      "display_name": "Нулевая ставка",
+      "percentage": "0.00",
+      "stripe_tax_id": "txr_1SnfjUKpfYmXuwNDAIj90YO2",
+      "inclusive": false,
+      "active": true,
+      "country": null,
+      "description": "В многих странах живые животные либо облагаются пониженной ставкой, либо вообще не облагаются налогом",
+      "jurisdiction": null,
+      "state": null,
+      "created_at": "2026-01-09T13:28:02.147Z",
+      "updated_at": "2026-01-09T13:28:02.147Z"
+    }
+  },
+  {
+    "model": "shop.tax",
+    "pk": 24,
+    "fields": {
+      "display_name": "Культурный налог",
+      "percentage": "5.00",
+      "stripe_tax_id": "txr_1SnfjmKpfYmXuwNDY4JxGEwK",
+      "inclusive": false,
+      "active": true,
+      "country": null,
+      "description": "Товары, связанные с культурным наследием и традициями",
+      "jurisdiction": null,
+      "state": null,
+      "created_at": "2026-01-09T13:28:19.838Z",
+      "updated_at": "2026-01-09T13:28:19.838Z"
+    }
+  },
+  {
+    "model": "shop.tax",
+    "pk": 25,
+    "fields": {
+      "display_name": "Экологический сбор",
+      "percentage": "15.00",
+      "stripe_tax_id": "txr_1Snfk6KpfYmXuwNDlB4AUd7j",
+      "inclusive": false,
+      "active": true,
+      "country": null,
+      "description": "Пластиковые/искусственные товары могут облагаться экологическим сбором для компенсации ущерба окружающей среде.",
+      "jurisdiction": null,
+      "state": null,
+      "created_at": "2026-01-09T13:28:40.529Z",
+      "updated_at": "2026-01-09T13:28:40.529Z"
+    }
+  },
+  {
+    "model": "shop.item",
+    "pk": 1,
+    "fields": {
+      "name": "Оливье",
+      "price": "99.99",
+      "description": "Закусочный салат русской кухни из отварных корнеплодов, солёных огурцов, яиц с мясом или варёной колбасой в майонезной заправке.",
+      "owner": 1,
+      "created_at": "2026-01-07T07:06:17.121Z",
+      "updated_at": "2026-01-09T13:29:05.527Z",
+      "is_available": true,
+      "image": "items/2026/01/07/olivie.png",
+      "category": 1,
+      "slug": "olivie",
+      "currency": 1,
+      "taxes": [
+        22
+      ]
+    }
+  },
+  {
+    "model": "shop.item",
+    "pk": 2,
+    "fields": {
+      "name": "Новогодний чай",
+      "price": "9.99",
+      "description": "Напиток, который ассоциируется с новогодним праздником, может быть частью праздничного декора или подарком. За отзыв мы готовы добавить кубик сахара.",
+      "owner": 1,
+      "created_at": "2026-01-07T07:06:53.234Z",
+      "updated_at": "2026-01-11T07:05:29.251Z",
+      "is_available": true,
+      "image": "items/2026/01/07/tea.jpg",
+      "category": 1,
+      "slug": "tea",
+      "currency": 3,
+      "taxes": [
+        22
+      ]
+    }
+  },
+  {
+    "model": "shop.item",
+    "pk": 3,
+    "fields": {
+      "name": "Морская свинка Иван",
+      "price": "999.99",
+      "description": "Морская свинка Иван — приятный молодой грызун вид, одомашненных грызунов из рода свинок семейства свинковых.",
+      "owner": 1,
+      "created_at": "2026-01-07T07:07:38.808Z",
+      "updated_at": "2026-01-11T07:05:55.546Z",
+      "is_available": true,
+      "image": "items/2026/01/07/morska9_svinka.jpg",
+      "category": 4,
+      "slug": "svinka-ivan",
+      "currency": 3,
+      "taxes": [
+        23
+      ]
+    }
+  },
+  {
+    "model": "shop.item",
+    "pk": 4,
+    "fields": {
+      "name": "Дед Мороз",
+      "price": "2026.00",
+      "description": "Это новогодняя игрушка, которая может использоваться как декоративный элемент, часть праздничного сценария или фотозоны.",
+      "owner": 1,
+      "created_at": "2026-01-07T07:09:52.368Z",
+      "updated_at": "2026-01-11T07:05:55.552Z",
+      "is_available": true,
+      "image": "items/2026/01/07/ded_moroz.jpg",
+      "category": 2,
+      "slug": "ded-moroz",
+      "currency": 1,
+      "taxes": [
+        24
+      ]
+    }
+  },
+  {
+    "model": "shop.item",
+    "pk": 5,
+    "fields": {
+      "name": "Новогодние ёлочки",
+      "price": "200.00",
+      "description": "Самодельные новогодние игрушки в виде ёлочки",
+      "owner": 1,
+      "created_at": "2026-01-07T07:10:12.045Z",
+      "updated_at": "2026-01-11T07:05:55.553Z",
+      "is_available": true,
+      "image": "items/2026/01/07/elki.jpg",
+      "category": 2,
+      "slug": "elki",
+      "currency": 2,
+      "taxes": [
+        25
+      ]
+    }
+  },
+  {
+    "model": "shop.item",
+    "pk": 6,
+    "fields": {
+      "name": "Гарри Поттер",
+      "price": "777.00",
+      "description": "Игрушка Гарри Поттера",
+      "owner": 1,
+      "created_at": "2026-01-07T07:10:40.647Z",
+      "updated_at": "2026-01-11T07:05:55.553Z",
+      "is_available": true,
+      "image": "items/2026/01/07/garry.jpg",
+      "category": 2,
+      "slug": "garri_potter",
+      "currency": 2,
+      "taxes": []
+    }
+  },
+  {
+    "model": "shop.category",
+    "pk": 1,
+    "fields": {
+      "name": "Еда",
+      "slug": "food"
+    }
+  },
+  {
+    "model": "shop.category",
+    "pk": 2,
+    "fields": {
+      "name": "Игрушки",
+      "slug": "toys"
+    }
+  },
+  {
+    "model": "shop.category",
+    "pk": 3,
+    "fields": {
+      "name": "Одежда",
+      "slug": "clothes"
+    }
+  },
+  {
+    "model": "shop.category",
+    "pk": 4,
+    "fields": {
+      "name": "Животные",
+      "slug": "animals"
+    }
+  },
+  {
+    "model": "shop.discount",
+    "pk": 1,
+    "fields": {
+      "name": "Купон для 1 категории",
+      "stripe_coupon_id": "x82O4OUA",
+      "amount_off": null,
+      "percent_off": "5.00",
+      "currency": null,
+      "duration": "forever",
+      "duration_in_months": null,
+      "is_active": true,
+      "created_at": "2026-01-10T15:19:11.976Z",
+      "updated_at": "2026-01-10T15:26:00.730Z"
+    }
+  },
+  {
+    "model": "shop.discount",
+    "pk": 2,
+    "fields": {
+      "name": "Купон для 2 категории",
+      "stripe_coupon_id": "iRon7uMo",
+      "amount_off": null,
+      "percent_off": "10.00",
+      "currency": null,
+      "duration": "forever",
+      "duration_in_months": null,
+      "is_active": true,
+      "created_at": "2026-01-10T15:21:35.477Z",
+      "updated_at": "2026-01-10T15:21:35.477Z"
+    }
+  },
+  {
+    "model": "shop.discount",
+    "pk": 3,
+    "fields": {
+      "name": "Купон для 3 категории",
+      "stripe_coupon_id": "jU7r3FfR",
+      "amount_off": null,
+      "percent_off": "15.00",
+      "currency": null,
+      "duration": "forever",
+      "duration_in_months": null,
+      "is_active": true,
+      "created_at": "2026-01-10T15:21:42.417Z",
+      "updated_at": "2026-01-10T15:21:42.417Z"
+    }
+  },
+  {
+    "model": "shop.discount",
+    "pk": 4,
+    "fields": {
+      "name": "Купон для 4 категории",
+      "stripe_coupon_id": "KIcFNT0L",
+      "amount_off": null,
+      "percent_off": "20.00",
+      "currency": null,
+      "duration": "forever",
+      "duration_in_months": null,
+      "is_active": true,
+      "created_at": "2026-01-10T15:22:47.185Z",
+      "updated_at": "2026-01-10T15:22:47.185Z"
+    }
+  },
+  {
+    "model": "shop.discount",
+    "pk": 5,
+    "fields": {
+      "name": "Купон для 5 категории",
+      "stripe_coupon_id": "6irl6kxt",
+      "amount_off": null,
+      "percent_off": "25.00",
+      "currency": null,
+      "duration": "forever",
+      "duration_in_months": null,
+      "is_active": true,
+      "created_at": "2026-01-10T15:22:59.852Z",
+      "updated_at": "2026-01-10T15:22:59.852Z"
+    }
+  },
+  {
+    "model": "shop.discount",
+    "pk": 6,
+    "fields": {
+      "name": "Купон для 6 категории",
+      "stripe_coupon_id": "GmqxTfMz",
+      "amount_off": null,
+      "percent_off": "30.00",
+      "currency": null,
+      "duration": "forever",
+      "duration_in_months": null,
+      "is_active": true,
+      "created_at": "2026-01-10T15:23:05.666Z",
+      "updated_at": "2026-01-10T15:23:05.666Z"
+    }
+  },
+  {
+    "model": "shop.discount",
+    "pk": 7,
+    "fields": {
+      "name": "Купон для 7 категории",
+      "stripe_coupon_id": "gxRYixGd",
+      "amount_off": null,
+      "percent_off": "35.00",
+      "currency": null,
+      "duration": "forever",
+      "duration_in_months": null,
+      "is_active": true,
+      "created_at": "2026-01-10T15:23:13.081Z",
+      "updated_at": "2026-01-10T15:23:13.081Z"
+    }
+  },
+  {
+    "model": "shop.discount",
+    "pk": 8,
+    "fields": {
+      "name": "Купон для 8 категории",
+      "stripe_coupon_id": "lSHh7GJs",
+      "amount_off": null,
+      "percent_off": "40.00",
+      "currency": null,
+      "duration": "forever",
+      "duration_in_months": null,
+      "is_active": true,
+      "created_at": "2026-01-10T15:26:10.839Z",
+      "updated_at": "2026-01-10T15:26:10.839Z"
+    }
+  },
+  {
+    "model": "shop.discount",
+    "pk": 9,
+    "fields": {
+      "name": "Купон для 9 категории",
+      "stripe_coupon_id": "FwQys1PA",
+      "amount_off": null,
+      "percent_off": "50.00",
+      "currency": null,
+      "duration": "forever",
+      "duration_in_months": null,
+      "is_active": true,
+      "created_at": "2026-01-10T15:26:21.208Z",
+      "updated_at": "2026-01-10T15:26:21.208Z"
+    }
+  },
+  {
+    "model": "shop.discount",
+    "pk": 10,
+    "fields": {
+      "name": "Купон для 10 категории",
+      "stripe_coupon_id": "hoNdpYVO",
+      "amount_off": null,
+      "percent_off": "55.00",
+      "currency": null,
+      "duration": "forever",
+      "duration_in_months": null,
+      "is_active": true,
+      "created_at": "2026-01-10T15:26:28.881Z",
+      "updated_at": "2026-01-10T15:26:28.881Z"
+    }
+  },
+  {
+    "model": "shop.discount",
+    "pk": 11,
+    "fields": {
+      "name": "Купон для 11 категории",
+      "stripe_coupon_id": "eWdTmtnK",
+      "amount_off": null,
+      "percent_off": "60.00",
+      "currency": null,
+      "duration": "forever",
+      "duration_in_months": null,
+      "is_active": true,
+      "created_at": "2026-01-10T15:26:35.905Z",
+      "updated_at": "2026-01-10T15:26:35.905Z"
+    }
+  },
+  {
+    "model": "shop.cart",
+    "pk": 5,
+    "fields": {
+      "user": 4,
+      "created_at": "2026-01-11T07:10:12.313Z"
+    }
+  },
+  {
+    "model": "shop.cart",
+    "pk": 7,
+    "fields": {
+      "user": 1,
+      "created_at": "2026-01-12T08:32:52.028Z"
+    }
+  },
+  {
+    "model": "shop.cartitem",
+    "pk": 46,
+    "fields": {
+      "cart": 7,
+      "item": 1,
+      "quantity": 3
+    }
+  },
+  {
+    "model": "shop.cartitem",
+    "pk": 47,
+    "fields": {
+      "cart": 7,
+      "item": 4,
+      "quantity": 2
+    }
+  },
+  {
+    "model": "shop.rankcategory",
+    "pk": 1,
+    "fields": {
+      "name": "Копеечный мечтатель",
+      "min_total": "0.00",
+      "discount": 1
+    }
+  },
+  {
+    "model": "shop.rankcategory",
+    "pk": 2,
+    "fields": {
+      "name": "Кошельковый юнга",
+      "min_total": "5000.00",
+      "discount": 2
+    }
+  },
+  {
+    "model": "shop.rankcategory",
+    "pk": 3,
+    "fields": {
+      "name": "Гуру скидочных купонов",
+      "min_total": "10000.00",
+      "discount": 3
+    }
+  },
+  {
+    "model": "shop.rankcategory",
+    "pk": 4,
+    "fields": {
+      "name": "Финансовый акробат",
+      "min_total": "15000.00",
+      "discount": 4
+    }
+  },
+  {
+    "model": "shop.rankcategory",
+    "pk": 5,
+    "fields": {
+      "name": "Корабль \"Наделённый\"",
+      "min_total": "30000.00",
+      "discount": 6
+    }
+  },
+  {
+    "model": "shop.rankcategory",
+    "pk": 6,
+    "fields": {
+      "name": "Фрегат \"Щедрая душа\"",
+      "min_total": "60000.00",
+      "discount": 7
+    }
+  },
+  {
+    "model": "shop.rankcategory",
+    "pk": 7,
+    "fields": {
+      "name": "Галеон \"Золотой телец\"",
+      "min_total": "100000.00",
+      "discount": 8
+    }
+  },
+  {
+    "model": "shop.rankcategory",
+    "pk": 8,
+    "fields": {
+      "name": "Линкор \"Платиновый киборг\"",
+      "min_total": "200000.00",
+      "discount": 9
+    }
+  },
+  {
+    "model": "shop.rankcategory",
+    "pk": 9,
+    "fields": {
+      "name": "Авианосец \"Вне бюджета\"",
+      "min_total": "500000.00",
+      "discount": 10
+    }
+  },
+  {
+    "model": "shop.rankcategory",
+    "pk": 10,
+    "fields": {
+      "name": "Межгалактический Корабль-Склад \"Легенда\"",
+      "min_total": "750000.00",
+      "discount": 11
+    }
+  },
+  {
+    "model": "shop.rankcategory",
+    "pk": 11,
+    "fields": {
+      "name": "Скидочный мореход",
+      "min_total": "20000.00",
+      "discount": 5
+    }
+  },
+  {
+    "model": "shop.currency",
+    "pk": 1,
+    "fields": {
+      "code": "rub",
+      "symbol": "R",
+      "name": "Рубль",
+      "rate_to_rub": "1.00",
+      "min_amount": "50.00",
+      "is_active": true,
+      "updated_at": "2026-01-12T14:22:17.409Z"
+    }
+  },
+  {
+    "model": "shop.currency",
+    "pk": 2,
+    "fields": {
+      "code": "usd",
+      "symbol": "S",
+      "name": "Доллар",
+      "rate_to_rub": "78.00",
+      "min_amount": "0.50",
+      "is_active": true,
+      "updated_at": "2026-01-12T14:22:24.892Z"
+    }
+  },
+  {
+    "model": "shop.currency",
+    "pk": 3,
+    "fields": {
+      "code": "eur",
+      "symbol": "E",
+      "name": "Евро",
+      "rate_to_rub": "92.00",
+      "min_amount": "0.50",
+      "is_active": true,
+      "updated_at": "2026-01-12T14:22:21.440Z"
+    }
+  }
+]

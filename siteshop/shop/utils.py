@@ -1,3 +1,4 @@
+from django.utils.functional import lazy
 
 
 def get_currency_choices():
@@ -24,5 +25,5 @@ def get_stripe_min_amount(currency_code):
     return int(float(currency.min_amount) * 100)
 
 
-CURRENCY_CHOICES = get_currency_choices()
-MIN_AMOUNTS = get_min_amounts()
+CURRENCY_CHOICES = lazy(get_currency_choices, list)()
+MIN_AMOUNTS = lazy(get_min_amounts, list)()

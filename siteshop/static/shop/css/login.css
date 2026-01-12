@@ -1,11 +1,11 @@
 /* Минимальная версия */
 .auth-container {
-    display: flex; /* Выравнивание по верху */
-    justify-content: center; /* Горизонтальное центрирование */
-    min-height: 100vh; /* Или нужная вам высота */
-    padding: 20px 0; /* Отступы сверху и снизу */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    padding: 20px;
 }
-
 
 .auth-card {
     width: 100%;
@@ -114,3 +114,6 @@
     text-decoration: underline;
 }
 
+.field-error {
+    color:rgb(255, 0, 0);
+}

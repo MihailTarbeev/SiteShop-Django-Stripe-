@@ -5,8 +5,8 @@ services:
     container_name: siteshop
     restart: unless-stopped
     command: >  
-            sh -c "python manage.py makemigrations
-                  python manage.py migrate
+            sh -c "python manage.py migrate &&
+                  { python manage.py loaddata /app/www/siteshop/db.json 2>/dev/null || echo 'No fixtures found'; } &&
                   python manage.py runserver 0.0.0.0:8000"
     env_file:
       - .env
