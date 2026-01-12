@@ -147,6 +147,8 @@ LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 LOGIN_URL = "users:login"
 
-stripe.api_key = os.environ.get("STRIPE_API_SECRET_KEY")
+# Возьмите тестовые ключи в профиле Stripe
+STRIPE_API_SECRET_KEY = '<Ваш_секретный_ключ>'
+STRIPE_PUBLIC_KEY = '<Ваш_публичный_ключ>'
 
-STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY")
+stripe.api_key = STRIPE_API_SECRET_KEY
